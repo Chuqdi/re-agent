@@ -1,50 +1,22 @@
 "use client";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { getAllRequests } from "@/lib/firebase/firestore";
+import { IRequest } from "@/lib/firebase/types";
 import { Plus, Search, Folder, FileText } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const tableCellClassname =
   "px-4 py-2.5 border-b border-gray-200 group-last:border-b-0";
-type RequestItemType = {
-  property: string;
-  type: "rent" | "buy";
-  amount: string;
-  date_added: string;
-  status: "Active" | "Closed";
-};
-
-const demoItems: RequestItemType[] = [
-  {
-    property: "3 Bedroom Terrace. Ikoyi",
-    type: "rent",
-    amount: "N40M",
-    date_added: "Updated 2h ago",
-    status: "Active",
-  },
-  {
-    property: "2 Bedroom Apartment. Victoria Island.",
-    type: "buy",
-    amount: "N450M",
-    date_added: "Updated 2h ago",
-    status: "Active",
-  },
-  {
-    property: "3 Bedroom House. Lekki.",
-    type: "buy",
-    amount: "N300M",
-    date_added: "Updated 1h ago",
-    status: "Closed",
-  },
-  {
-    property: "3 Bedroom Apartment. Ikoyi.",
-    type: "buy",
-    amount: "N600M",
-    date_added: "Updated 1M ago",
-    status: "Closed",
-  },
-];
 
 export default function RequestsPage() {
+  const [requests, setRequests] = useState<IRequest[]>();
+  useEffect(() => {
+    getAllRequests().then((r) => {
+      setRequests(r);
+    });
+  }, []);
   return (
     <AppShell>
       {() => (
@@ -59,10 +31,13 @@ export default function RequestsPage() {
                 packets.
               </p>
             </div>
-            <button className="inline-flex items-center gap-1.5 rounded-full border border-gray-300 bg-black text-xs font-medium text-white px-3 py-1.5 hover:bg-black/90">
+            <Link
+              href="/requests/add-new-request"
+              className="inline-flex items-center gap-1.5 rounded-full border border-gray-300 bg-black text-xs font-medium text-white px-3 py-1.5 hover:bg-black/90"
+            >
               <Plus className="h-3.5 w-3.5" color="white" />
               New
-            </button>
+            </Link>
           </header>
 
           <div className="card-elevated mb-4 flex items-center gap-2 px-3 py-2.5">
@@ -91,7 +66,7 @@ export default function RequestsPage() {
             </thead>
 
             <tbody>
-              {demoItems.map((item) => (
+              {requests?.map((item) => (
                 <tr key={item?.property} className="group hover:bg-gray-50">
                   <td className={tableCellClassname}>
                     <span className="truncate text-[12px] text-black">
@@ -122,7 +97,7 @@ export default function RequestsPage() {
 
                   <td className={tableCellClassname}>
                     <span className="text-[11px] text-gray-500">
-                      {item.date_added}
+                      {item?.createdAt?.toDate()?.toDateString()}
                     </span>
                   </td>
 

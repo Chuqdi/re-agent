@@ -1,5 +1,7 @@
 // Firestore Collection Types
 
+import { Timestamp } from "firebase/firestore";
+
 export interface User {
   uid: string;
   email: string;
@@ -88,3 +90,17 @@ export interface ActiveShowingLocation {
   timestamp: number;
 }
 
+
+
+export interface IRequest {
+  id:string;
+  property: string;
+  city: string;
+  state: string;
+  type: string;
+  amount: number;
+  status: string;
+  userId: string; 
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
