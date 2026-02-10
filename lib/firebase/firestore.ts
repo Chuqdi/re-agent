@@ -10,10 +10,11 @@ import {
   where,
   orderBy,
   Timestamp,
+  addDoc,
   QueryConstraint,
-} from 'firebase/firestore';
-import { db } from './config';
-import { User, Client, Listing, Showing, Document } from './types';
+} from "firebase/firestore";
+import { db } from "./config";
+import { User, Client, Listing, Showing, Document, IRequest } from "./types";
 
 // Helper to convert Firestore Timestamp to Date
 const timestampToDate = (timestamp: any): Date => {
@@ -29,9 +30,11 @@ const dateToTimestamp = (date: Date): Timestamp => {
 };
 
 // Users Collection
-export const usersCollection = collection(db, 'users');
+export const usersCollection = collection(db, "users");
 
-export const createUser = async (userData: Omit<User, 'createdAt' | 'updatedAt'>): Promise<void> => {
+export const createUser = async (
+  userData: Omit<User, "createdAt" | "updatedAt">,
+): Promise<void> => {
   const userRef = doc(usersCollection, userData.uid);
   // Strip out undefined fields so Firestore doesn't reject the write
   const sanitized: Record<string, any> = {};
@@ -51,7 +54,7 @@ export const getUser = async (uid: string): Promise<User | null> => {
   const userRef = doc(usersCollection, uid);
   const userSnap = await getDoc(userRef);
   if (!userSnap.exists()) return null;
-  
+
   const data = userSnap.data();
   return {
     ...data,
@@ -60,7 +63,9 @@ export const getUser = async (uid: string): Promise<User | null> => {
   } as User;
 };
 
-export const getUsersByIds = async (uids: string[]): Promise<Record<string, User>> => {
+export const getUsersByIds = async (
+  uids: string[],
+): Promise<Record<string, User>> => {
   const uniqueIds = Array.from(new Set(uids.filter(Boolean)));
   if (uniqueIds.length === 0) return {};
 
@@ -77,13 +82,16 @@ export const getUsersByIds = async (uids: string[]): Promise<Record<string, User
           updatedAt: timestampToDate(data.updatedAt),
         } as User;
       }
-    })
+    }),
   );
 
   return results;
 };
 
-export const updateUser = async (uid: string, updates: Partial<User>): Promise<void> => {
+export const updateUser = async (
+  uid: string,
+  updates: Partial<User>,
+): Promise<void> => {
   const userRef = doc(usersCollection, uid);
   const sanitized: Record<string, any> = {};
   Object.entries(updates).forEach(([key, value]) => {
@@ -98,9 +106,11 @@ export const updateUser = async (uid: string, updates: Partial<User>): Promise<v
 };
 
 // Clients Collection
-export const clientsCollection = collection(db, 'clients');
+export const clientsCollection = collection(db, "clients");
 
-export const createClient = async (clientData: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
+export const createClient = async (
+  clientData: Omit<Client, "id" | "createdAt" | "updatedAt">,
+): Promise<string> => {
   const clientRef = doc(clientsCollection);
   const clientId = clientRef.id;
   await setDoc(clientRef, {
@@ -116,7 +126,7 @@ export const getClient = async (clientId: string): Promise<Client | null> => {
   const clientRef = doc(clientsCollection, clientId);
   const clientSnap = await getDoc(clientRef);
   if (!clientSnap.exists()) return null;
-  
+
   const data = clientSnap.data();
   return {
     ...data,
@@ -126,9 +136,13 @@ export const getClient = async (clientId: string): Promise<Client | null> => {
 };
 
 export const getClientsByAgent = async (agentId: string): Promise<Client[]> => {
-  const q = query(clientsCollection, where('agentId', '==', agentId), orderBy('createdAt', 'desc'));
+  const q = query(
+    clientsCollection,
+    where("agentId", "==", agentId),
+    orderBy("createdAt", "desc"),
+  );
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => {
+  return querySnapshot.docs.map((doc) => {
     const data = doc.data();
     return {
       ...data,
@@ -138,7 +152,10 @@ export const getClientsByAgent = async (agentId: string): Promise<Client[]> => {
   });
 };
 
-export const updateClient = async (clientId: string, updates: Partial<Client>): Promise<void> => {
+export const updateClient = async (
+  clientId: string,
+  updates: Partial<Client>,
+): Promise<void> => {
   const clientRef = doc(clientsCollection, clientId);
   await updateDoc(clientRef, {
     ...updates,
@@ -147,9 +164,11 @@ export const updateClient = async (clientId: string, updates: Partial<Client>): 
 };
 
 // Listings Collection
-export const listingsCollection = collection(db, 'listings');
+export const listingsCollection = collection(db, "listings");
 
-export const createListing = async (listingData: Omit<Listing, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
+export const createListing = async (
+  listingData: Omit<Listing, "id" | "createdAt" | "updatedAt">,
+): Promise<string> => {
   const listingRef = doc(listingsCollection);
   const listingId = listingRef.id;
   await setDoc(listingRef, {
@@ -161,11 +180,13 @@ export const createListing = async (listingData: Omit<Listing, 'id' | 'createdAt
   return listingId;
 };
 
-export const getListing = async (listingId: string): Promise<Listing | null> => {
+export const getListing = async (
+  listingId: string,
+): Promise<Listing | null> => {
   const listingRef = doc(listingsCollection, listingId);
   const listingSnap = await getDoc(listingRef);
   if (!listingSnap.exists()) return null;
-  
+
   const data = listingSnap.data();
   return {
     ...data,
@@ -174,10 +195,16 @@ export const getListing = async (listingId: string): Promise<Listing | null> => 
   } as Listing;
 };
 
-export const getListingsByAgent = async (agentId: string): Promise<Listing[]> => {
-  const q = query(listingsCollection, where('agentId', '==', agentId), orderBy('createdAt', 'desc'));
+export const getListingsByAgent = async (
+  agentId: string,
+): Promise<Listing[]> => {
+  const q = query(
+    listingsCollection,
+    where("agentId", "==", agentId),
+    orderBy("createdAt", "desc"),
+  );
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => {
+  return querySnapshot.docs.map((doc) => {
     const data = doc.data();
     return {
       ...data,
@@ -188,9 +215,11 @@ export const getListingsByAgent = async (agentId: string): Promise<Listing[]> =>
 };
 
 // Showings Collection
-export const showingsCollection = collection(db, 'showings');
+export const showingsCollection = collection(db, "showings");
 
-export const createShowing = async (showingData: Omit<Showing, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
+export const createShowing = async (
+  showingData: Omit<Showing, "id" | "createdAt" | "updatedAt">,
+): Promise<string> => {
   const showingRef = doc(showingsCollection);
   const showingId = showingRef.id;
   await setDoc(showingRef, {
@@ -201,8 +230,6 @@ export const createShowing = async (showingData: Omit<Showing, 'id' | 'createdAt
   });
   return showingId;
 };
-
-
 
 export const getShowings = async (): Promise<Showing[]> => {
   const snapshot = await getDocs(showingsCollection);
@@ -215,78 +242,99 @@ export const getShowings = async (): Promise<Showing[]> => {
     return {
       id: docSnap.id, // include id if your Showing type expects it
       ...data,
-     
-     // startTime: timestampToDate(data.startTime),
-     // endTime: timestampToDate(data.endTime),
-     // checkInTime: data.checkInTime
-     //   ? timestampToDate(data.checkInTime)
-     //   : undefined,
-     // checkOutTime: data.checkOutTime
-     //   ? timestampToDate(data.checkOutTime)
-     //   : undefined,
-     // createdAt: timestampToDate(data.createdAt),
-     // updatedAt: timestampToDate(data.updatedAt),
+
+      // startTime: timestampToDate(data.startTime),
+      // endTime: timestampToDate(data.endTime),
+      // checkInTime: data.checkInTime
+      //   ? timestampToDate(data.checkInTime)
+      //   : undefined,
+      // checkOutTime: data.checkOutTime
+      //   ? timestampToDate(data.checkOutTime)
+      //   : undefined,
+      // createdAt: timestampToDate(data.createdAt),
+      // updatedAt: timestampToDate(data.updatedAt),
     } as Showing;
   });
 };
 
-
-
-
-export const getShowing = async (showingId: string): Promise<Showing | null> => {
+export const getShowing = async (
+  showingId: string,
+): Promise<Showing | null> => {
   const showingRef = doc(showingsCollection, showingId);
   const showingSnap = await getDoc(showingRef);
   if (!showingSnap.exists()) return null;
-  
+
   const data = showingSnap.data();
   return {
     ...data,
     startTime: timestampToDate(data.startTime),
     endTime: timestampToDate(data.endTime),
-    checkInTime: data.checkInTime ? timestampToDate(data.checkInTime) : undefined,
-    checkOutTime: data.checkOutTime ? timestampToDate(data.checkOutTime) : undefined,
+    checkInTime: data.checkInTime
+      ? timestampToDate(data.checkInTime)
+      : undefined,
+    checkOutTime: data.checkOutTime
+      ? timestampToDate(data.checkOutTime)
+      : undefined,
     createdAt: timestampToDate(data.createdAt),
     updatedAt: timestampToDate(data.updatedAt),
   } as Showing;
 };
 
-export const getShowingsByAgent = async (agentId: string): Promise<Showing[]> => {
-  const q = query(showingsCollection, where('agentId', '==', agentId), orderBy('startTime', 'asc'));
+export const getShowingsByAgent = async (
+  agentId: string,
+): Promise<Showing[]> => {
+  const q = query(
+    showingsCollection,
+    where("agentId", "==", agentId),
+    orderBy("startTime", "asc"),
+  );
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => {
+  return querySnapshot.docs.map((doc) => {
     const data = doc.data();
     return {
       ...data,
       startTime: timestampToDate(data.startTime),
       endTime: timestampToDate(data.endTime),
-      checkInTime: data.checkInTime ? timestampToDate(data.checkInTime) : undefined,
-      checkOutTime: data.checkOutTime ? timestampToDate(data.checkOutTime) : undefined,
+      checkInTime: data.checkInTime
+        ? timestampToDate(data.checkInTime)
+        : undefined,
+      checkOutTime: data.checkOutTime
+        ? timestampToDate(data.checkOutTime)
+        : undefined,
       createdAt: timestampToDate(data.createdAt),
       updatedAt: timestampToDate(data.updatedAt),
     } as Showing;
   });
 };
 
-export const updateShowing = async (showingId: string, updates: Partial<Showing>): Promise<void> => {
+export const updateShowing = async (
+  showingId: string,
+  updates: Partial<Showing>,
+): Promise<void> => {
   const showingRef = doc(showingsCollection, showingId);
   const updateData: any = {
     ...updates,
     updatedAt: Timestamp.now(),
   };
-  
+
   // Convert Date objects to Timestamps
-  if (updates.startTime) updateData.startTime = dateToTimestamp(updates.startTime);
+  if (updates.startTime)
+    updateData.startTime = dateToTimestamp(updates.startTime);
   if (updates.endTime) updateData.endTime = dateToTimestamp(updates.endTime);
-  if (updates.checkInTime) updateData.checkInTime = dateToTimestamp(updates.checkInTime);
-  if (updates.checkOutTime) updateData.checkOutTime = dateToTimestamp(updates.checkOutTime);
-  
+  if (updates.checkInTime)
+    updateData.checkInTime = dateToTimestamp(updates.checkInTime);
+  if (updates.checkOutTime)
+    updateData.checkOutTime = dateToTimestamp(updates.checkOutTime);
+
   await updateDoc(showingRef, updateData);
 };
 
 // Documents Collection
-export const documentsCollection = collection(db, 'documents');
+export const documentsCollection = collection(db, "documents");
 
-export const createDocument = async (documentData: Omit<Document, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
+export const createDocument = async (
+  documentData: Omit<Document, "id" | "createdAt" | "updatedAt">,
+): Promise<string> => {
   const documentRef = doc(documentsCollection);
   const documentId = documentRef.id;
   await setDoc(documentRef, {
@@ -298,11 +346,13 @@ export const createDocument = async (documentData: Omit<Document, 'id' | 'create
   return documentId;
 };
 
-export const getDocument = async (documentId: string): Promise<Document | null> => {
+export const getDocument = async (
+  documentId: string,
+): Promise<Document | null> => {
   const documentRef = doc(documentsCollection, documentId);
   const documentSnap = await getDoc(documentRef);
   if (!documentSnap.exists()) return null;
-  
+
   const data = documentSnap.data();
   return {
     ...data,
@@ -311,12 +361,18 @@ export const getDocument = async (documentId: string): Promise<Document | null> 
   } as Document;
 };
 
-export const getDocumentsByAgent = async (agentId: string): Promise<Document[]> => {
-  const q = query(documentsCollection, where('agentId', '==', agentId), orderBy('createdAt', 'desc'));
+export const getDocumentsByAgent = async (
+  agentId: string,
+): Promise<Document[]> => {
+  const q = query(
+    documentsCollection,
+    where("agentId", "==", agentId),
+    orderBy("createdAt", "desc"),
+  );
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => {
+  return querySnapshot.docs.map((doc) => {
     const data = doc.data();
-    return { 
+    return {
       ...data,
       createdAt: timestampToDate(data.createdAt),
       updatedAt: timestampToDate(data.updatedAt),
@@ -324,7 +380,10 @@ export const getDocumentsByAgent = async (agentId: string): Promise<Document[]> 
   });
 };
 
-export const updateDocument = async (documentId: string, updates: Partial<Document>): Promise<void> => {
+export const updateDocument = async (
+  documentId: string,
+  updates: Partial<Document>,
+): Promise<void> => {
   const documentRef = doc(documentsCollection, documentId);
   await updateDoc(documentRef, {
     ...updates,
@@ -332,3 +391,39 @@ export const updateDocument = async (documentId: string, updates: Partial<Docume
   });
 };
 
+export const createNewRequest = async (
+  propertyData: Omit<IRequest, "id" | "userId" | "createdAt" | "updatedAt">,
+  userId: string,
+) => {
+  try {
+    const docRef = await addDoc(collection(db, "requests"), {
+      ...propertyData,
+      userId: userId, // Store user ID as reference
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    });
+
+    console.log("Property created with ID: ", docRef.id);
+    return docRef.id;
+  } catch (error) {
+    console.error("Error creating property: ", error);
+    throw error;
+  }
+};
+
+export const getAllRequests: () => Promise<IRequest[]> = async () => {
+  try {
+    const q = query(collection(db, "requests"), orderBy("createdAt", "desc"));
+
+    const querySnapshot = await getDocs(q);
+    const requests = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as IRequest[];
+
+    return requests;
+  } catch (error) {
+    console.error("Error fetching requests:", error);
+    throw error;
+  }
+};
