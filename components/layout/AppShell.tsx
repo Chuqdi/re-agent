@@ -16,6 +16,8 @@ import {
   Menu,
   GitPullRequest,
   X,
+  Settings,
+  CopySlash,
 } from 'lucide-react';
 import { signOut } from '@/lib/firebase/auth';
 
@@ -30,6 +32,8 @@ const navItems = [
   { href: '/location', label: 'Location', icon: MapPin },
   { href: '/requests', label: 'Requests', icon: GitPullRequest },
   { href: '/contacts', label: 'Contacts', icon: Users },
+  { href: '/invoices', label: 'Invoices', icon: CopySlash },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
 export function AppShell({ children }: AppShellProps) {
