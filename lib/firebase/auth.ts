@@ -7,8 +7,13 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
   linkWithPopup,
+  getAuth,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
 } from 'firebase/auth';
 import { auth } from './config';
+
 
 // Google OAuth Provider with additional scopes
 const googleProvider = new GoogleAuthProvider();
@@ -180,3 +185,31 @@ export const isGoogleLinked = (): boolean => {
   return user.providerData.some((provider) => provider.providerId === 'google.com');
 };
 
+
+
+
+export async function changePassword(
+  oldPassword: string,
+  newPassword: string,
+  confirmPassword: string
+) {
+  if (newPassword !== confirmPassword) {
+    throw new Error("Passwords do not match");
+  }
+
+  const auth = getAuth();
+  const user = auth.currentUser;
+
+  if (!user || !user.email) {
+    throw new Error("User not authenticated");
+  }
+
+  const credential = EmailAuthProvider.credential(
+    user.email,
+    oldPassword
+  );
+
+  await reauthenticateWithCredential(user, credential);
+
+  await updatePassword(user, newPassword);
+}
