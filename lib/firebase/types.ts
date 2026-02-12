@@ -104,3 +104,17 @@ export interface IRequest {
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
+
+
+export interface IContact {
+  id:string;
+  userId: string; 
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+
+
+  firstName:string;
+  lastName:string;
+  email:string;
+  phoneNumber:string;
+}
