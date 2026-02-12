@@ -6,7 +6,7 @@ import Button from "@/components/ui/Button";
 import * as yup from "yup";
 import { useFormik } from "formik";
 
-export const scheme = yup.object().shape({
+ const scheme = yup.object().shape({
   firstName: yup.string().required("Required!"),
   lastName: yup.string().required("Required!"),
   email: yup.string().required("Required!"),
