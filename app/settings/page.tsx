@@ -14,11 +14,11 @@ export const scheme = yup.object().shape({
   new_password: yup
     .string()
     .min(6, "Password must be at least 6 characters long")
-    .matches(
+    /*.matches(
       /[!@#$%^&*(),.?":{}|<>]/,
       "Password must contain at least one special character",
     )
-    .matches(/[0-9]/, "Password must contain at least one number")
+    .matches(/[0-9]/, "Password must contain at least one number")*/
     .matches(/[a-z]/, "Password must contain at least one lowercase letter")
     .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
     .required("Password is required"),
