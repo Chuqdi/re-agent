@@ -14,7 +14,16 @@ import {
   QueryConstraint,
 } from "firebase/firestore";
 import { db } from "./config";
-import { User, Client, Listing, Showing, Document, IRequest } from "./types";
+import {
+  User,
+  Client,
+  Listing,
+  Showing,
+  Document,
+  IRequest,
+  IContact,
+} from "./types";
+import { COLLECTIONS } from ".";
 
 // Helper to convert Firestore Timestamp to Date
 const timestampToDate = (timestamp: any): Date => {
@@ -396,7 +405,7 @@ export const createNewRequest = async (
   userId: string,
 ) => {
   try {
-    const docRef = await addDoc(collection(db, "requests"), {
+    const docRef = await addDoc(collection(db, COLLECTIONS.REQUESTS), {
       ...propertyData,
       userId: userId, // Store user ID as reference
       createdAt: Timestamp.now(),
@@ -411,9 +420,14 @@ export const createNewRequest = async (
   }
 };
 
+
+
 export const getAllRequests: () => Promise<IRequest[]> = async () => {
   try {
-    const q = query(collection(db, "requests"), orderBy("createdAt", "desc"));
+    const q = query(
+      collection(db, COLLECTIONS.REQUESTS),
+      orderBy("createdAt", "desc"),
+    );
 
     const querySnapshot = await getDocs(q);
     const requests = querySnapshot.docs.map((doc) => ({
@@ -424,6 +438,50 @@ export const getAllRequests: () => Promise<IRequest[]> = async () => {
     return requests;
   } catch (error) {
     console.error("Error fetching requests:", error);
+    throw error;
+  }
+};
+
+
+
+export const createNewContact = async (
+  contactData: Omit<IContact, "id" | "userId" | "createdAt" | "updatedAt">,
+  userId: string,
+) => {
+  try {
+    const docRef = await addDoc(collection(db, COLLECTIONS.CONTACTS), {
+      ...contactData,
+      userId: userId, // Store user ID as reference
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    });
+
+    console.log("Contact created with ID: ", docRef.id);
+    return docRef.id;
+  } catch (error) {
+    console.error("Error creating Contact: ", error);
+    throw error;
+  }
+};
+
+
+
+export const getAllContacts: () => Promise<IContact[]> = async () => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.CONTACTS),
+      orderBy("createdAt"),
+    );
+
+    const querySnapshot = await getDocs(q);
+    const contacts = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as IContact[];
+
+    return contacts;
+  } catch (error) {
+    console.error("Error fetching contacts:", error);
     throw error;
   }
 };

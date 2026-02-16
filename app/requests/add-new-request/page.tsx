@@ -37,7 +37,9 @@ function AddnewRequest() {
       const userId = currentUser?.uid;
       if (userId) await createNewRequest(data, userId!);
       router.push("/requests");
-    } catch (error) {}
+    } catch (error) {
+      alert("Error creating requests");
+    }
     setIsLoading(false);
   };
   const { values, handleSubmit, handleChange, errors, touched } = useFormik({
