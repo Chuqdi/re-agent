@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signInWithEmail, signInWithGoogle } from '@/lib/firebase/auth';
+import PhoneAuth from './sections/PhoneAuth';
 
 export default function LoginPage() {
   const router = useRouter();

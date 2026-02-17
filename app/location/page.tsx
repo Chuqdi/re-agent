@@ -1,12 +1,17 @@
-'use client';
+"use client";
 
-import { AppShell } from '@/components/layout/AppShell';
-import { getShowings } from '@/lib/firebase/firestore';
-import { Showing } from '@/lib/firebase/types';
-import { useEffect, useMemo, useState } from 'react';
-import { GoogleMap, useJsApiLoader, MarkerF } from '@react-google-maps/api';
-import { useRouter } from 'next/navigation';
-
+import { AppShell } from "@/components/layout/AppShell";
+import { getShowings } from "@/lib/firebase/firestore";
+import { Showing } from "@/lib/firebase/types";
+import { useEffect, useMemo, useState } from "react";
+import {
+  GoogleMap,
+  useJsApiLoader,
+  MarkerF,
+  Marker,
+  useLoadScript,
+} from "@react-google-maps/api";
+import { useRouter } from "next/navigation";
 
 type LocationAgent = {
   id: string;
@@ -23,124 +28,131 @@ type ShowingFilter = {
 };
 
 let demoShowings: ShowingFilter[] = [
-  { id: 'all', label: 'All Showings' },
-  { id: 's1', label: '2418 Maple St • 10:30' },
-  { id: 's2', label: '884 Cedar Ave • 13:00' },
+  { id: "all", label: "All Showings" },
+  { id: "s1", label: "2418 Maple St • 10:30" },
+  { id: "s2", label: "884 Cedar Ave • 13:00" },
 ];
 
 const demoAgents: LocationAgent[] = [
   {
-    id: 'a1',
-    name: 'You',
-    initials: 'YU',
+    id: "a1",
+    name: "You",
+    initials: "YU",
     lat: 37.7749,
     lng: -122.4194,
-    showingId: 's1',
+    showingId: "s1",
   },
   {
-    id: 'a2',
-    name: 'Sarah Lin',
-    initials: 'SL',
+    id: "a2",
+    name: "Sarah Lin",
+    initials: "SL",
     lat: 37.7849,
     lng: -122.4094,
-    showingId: 's2',
+    showingId: "s2",
   },
 ];
 
 export default function LocationPage() {
   const router = useRouter();
 
-  const [filter, setFilter] = useState<string>('all');
-  const [chosenShowing, setChosenShowing] = useState<string>('');
+  const [filter, setFilter] = useState<string>("all");
+  const [chosenShowing, setChosenShowing] = useState<string>("");
 
-  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteEmail, setInviteEmail] = useState("");
   const [realTimeData, setRealTimeData] = useState(null); // State for proxy data
-  const [allShowings,setAllShowings] = useState<Showing[]>([])
+  const [allShowings, setAllShowings] = useState<Showing[]>([]);
+  const hasMapsKey = !!(
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+  );
 
-// The Proxy Call 
-useEffect(() => {
-  const fetchAgentData = async () => {
-    try {
-      const response = await fetch('/api/google-proxy'); // Calling your backend route
-      const data = await response.json();
-      setRealTimeData(data);
-    } catch (error) {
-      console.error("Failed to fetch location data via proxy", error);
-    }
-  };
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey:
+      process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY! 
+  });
 
-  fetchAgentData();
-}, []);
+  // The Proxy Call
+  useEffect(() => {
+    const fetchAgentData = async () => {
+      try {
+        const response = await fetch("/api/google-proxy"); // Calling your backend route
+        const data = await response.json();
+        setRealTimeData(data);
+      } catch (error) {
+        console.error("Failed to fetch location data via proxy", error);
+      }
+    };
 
+    fetchAgentData();
+  }, []);
 
-useEffect(() => {
-  // Load user's showings
-  const loadShowings = async () => {
-    try {
-      const showings = await getShowings();
-  
-      const showingsWithAgents = showings.map((showing, index) => ({
-        ...showing,
-        agentId: index % 2 === 0 ? 's1' : 's2',
-      }));
-  
-      setAllShowings(showingsWithAgents);
-    } catch (error) {
-      console.error('Error loading showings:', error);
-    }
-  };
-  
-  loadShowings();
-  
+  useEffect(() => {
+    // Load user's showings
+    const loadShowings = async () => {
+      try {
+        const showings = await getShowings();
 
- // // Subscribe to active showings
- // const unsubscribe = subscribeToActiveShowings((showings) => {
- //   setActiveShowings(showings);
- // });
-//
- // return () => {
- //   unsubscribe();
- // };
-}, [ ]);
+        const showingsWithAgents = showings.map((showing, index) => ({
+          ...showing,
+          agentId: index % 2 === 0 ? "s1" : "s2",
+        }));
 
+        setAllShowings(showingsWithAgents);
+      } catch (error) {
+        console.error("Error loading showings:", error);
+      }
+    };
 
+    loadShowings();
 
+    // // Subscribe to active showings
+    // const unsubscribe = subscribeToActiveShowings((showings) => {
+    //   setActiveShowings(showings);
+    // });
+    //
+    // return () => {
+    //   unsubscribe();
+    // };
+  }, []);
 
   const filteredAgents = useMemo(
     () =>
-      filter === 'all'
+      filter === "all"
         ? demoAgents
         : demoAgents.filter((agent) => agent.showingId === filter),
     [filter],
   );
 
- 
-
   const handleInvite = () => {
-    if (!chosenShowing){
-      window.alert("Please Select a showing first!")
+    if (!chosenShowing) {
+      window.alert("Please Select a showing first!");
       return;
     }
     // Placeholder: in real app, call backend to send invite for /share-location
-    console.log('Send invite to:', inviteEmail);
-    
+    console.log("Send invite to:", inviteEmail);
 
     //chat gpt put code here -START
-   console.log("ALL SHOWINGS =====>",allShowings)
+    console.log("ALL SHOWINGS =====>", allShowings);
 
-   console.log("CHOSEN SHOWINGS =====>",chosenShowing)
+    console.log("CHOSEN SHOWINGS =====>", chosenShowing);
 
- if (chosenShowing && chosenShowing !== 'all') {
-    router.push(`/mylocation?showing=${encodeURIComponent(chosenShowing)}`);
-  }
+    if (chosenShowing && chosenShowing !== "all") {
+      router.push(`/mylocation?showing=${encodeURIComponent(chosenShowing)}`);
+    }
 
-   //chat gpt put code here - END
+    //chat gpt put code here - END
 
-    setInviteEmail('');
+    setInviteEmail("");
   };
 
-  const hasMapsKey = !!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const containerStyle = {
+    width: "100%",
+    height: "600px",
+  };
 
+  const center = {
+    lat: 6.5244, // Lagos
+    lng: 3.3792,
+  };
   return (
     <AppShell>
       {() => (
@@ -164,11 +176,9 @@ useEffect(() => {
                 className="h-7 flex-1 bg-transparent text-xs text-black placeholder:text-gray-400 focus:outline-none"
               />
               <button
-              type='button'
+                type="button"
                 onClick={handleInvite}
                 className=" inline-flex h-7 items-center rounded-full bg-black px-3 text-[11px] font-medium text-white hover:bg-black/90"
-                
-
               >
                 Send Invite
               </button>
@@ -183,9 +193,7 @@ useEffect(() => {
                 value={chosenShowing}
                 onChange={(e) => setChosenShowing(e.target.value)}
                 className="bg-white text-xs text-black focus:outline-none"
-                
               >
-                
                 {allShowings.map((s) => (
                   <option key={s.id} value={s.id} className="bg-white">
                     {s.address}
@@ -194,7 +202,8 @@ useEffect(() => {
               </select>
             </div>
             <span className="text-[11px] text-gray-500">
-              {filteredAgents.length} active agent{filteredAgents.length === 1 ? '' : 's'}
+              {filteredAgents.length} active agent
+              {filteredAgents.length === 1 ? "" : "s"}
             </span>
           </div>
 
@@ -203,6 +212,15 @@ useEffect(() => {
             {hasMapsKey ? (
               <div className="h-full w-full">
                 {/* Replace this with GoogleMap/Mapbox implementation wired to filteredAgents */}
+                {isLoaded && (
+                  <GoogleMap
+                    mapContainerStyle={containerStyle}
+                    center={center}
+                    zoom={12}
+                  >
+                    <Marker position={center} />
+                  </GoogleMap>
+                )}
               </div>
             ) : (
               <div className="flex h-full flex-col items-center justify-center gap-4 bg-white">
@@ -210,7 +228,10 @@ useEffect(() => {
                 <div className="text-center text-xs text-gray-600">
                   <p className="font-medium text-black">Map not configured</p>
                   <p className="mt-1 text-[11px] text-gray-500">
-                    Add <span className="font-mono text-[10px] text-black">NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</span>{' '}
+                    Add{" "}
+                    <span className="font-mono text-[10px] text-black">
+                      NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+                    </span>{" "}
                     to your environment to render live agent locations.
                   </p>
                   <div className="mt-3 flex justify-center gap-2 text-[11px] text-gray-600">
@@ -235,5 +256,3 @@ useEffect(() => {
     </AppShell>
   );
 }
-
-
