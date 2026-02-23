@@ -20,9 +20,8 @@ function getOrCreateVerifier(): RecaptchaVerifier {
 
   const verifier = new RecaptchaVerifier(auth, "recaptcha-container", {
     size: "invisible",
-    callback: () => {}, // reCAPTCHA solved
+    callback: () => {},  
     "expired-callback": () => {
-      // Reset when token expires
       window.recaptchaVerifier?.clear();
       window.recaptchaVerifier = null;
     },

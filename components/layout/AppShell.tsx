@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
-import { auth } from '@/lib/firebase/config';
-import LoginPage from '@/components/LoginPage';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
+import { auth } from "@/lib/firebase/config";
+import LoginPage from "@/components/LoginPage";
 import {
   Home,
   FolderKanban,
@@ -18,22 +18,22 @@ import {
   X,
   Settings,
   CopySlash,
-} from 'lucide-react';
-import { signOut } from '@/lib/firebase/auth';
+} from "lucide-react";
+import { signOut } from "@/lib/firebase/auth";
 
 type AppShellProps = {
   children: (user: FirebaseUser) => React.ReactNode;
 };
 
 const navItems = [
-  { href: '/dashboard', label: 'Home', icon: Home },
-  { href: '/vault', label: 'Vault', icon: FolderKanban },
-  { href: '/showings', label: 'Showings', icon: CalendarDays },
-  { href: '/location', label: 'Location', icon: MapPin },
-  { href: '/requests', label: 'Requests', icon: GitPullRequest },
-  { href: '/contacts', label: 'Contacts', icon: Users },
-  { href: '/invoices', label: 'Invoices', icon: CopySlash },
-  { href: '/settings', label: 'Settings', icon: Settings },
+  { href: "/dashboard", label: "Home", icon: Home },
+  { href: "/dashboard/vault", label: "Vault", icon: FolderKanban },
+  { href: "/dashboard/showings", label: "Showings", icon: CalendarDays },
+  { href: "/dashboard/location", label: "Location", icon: MapPin },
+  { href: "/dashboard/requests", label: "Requests", icon: GitPullRequest },
+  { href: "/dashboard/contacts", label: "Contacts", icon: Users },
+  { href: "/dashboard/invoices", label: "Invoices", icon: CopySlash },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
 export function AppShell({ children }: AppShellProps) {
@@ -54,10 +54,10 @@ export function AppShell({ children }: AppShellProps) {
   const handleSignOut = async () => {
     try {
       await signOut();
-      router.push('/login');
+      router.push("/login");
       router.refresh();
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error("Error signing out:", error);
     }
   };
 
@@ -87,7 +87,11 @@ export function AppShell({ children }: AppShellProps) {
           onClick={() => setSidebarOpen((v) => !v)}
           className="rounded-md p-2 hover:bg-gray-100"
         >
-          {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {sidebarOpen ? (
+            <X className="h-5 w-5" />
+          ) : (
+            <Menu className="h-5 w-5" />
+          )}
         </button>
       </div>
 
@@ -102,7 +106,7 @@ export function AppShell({ children }: AppShellProps) {
         className={`
           fixed inset-y-0 left-0 z-30 w-64 flex-col border-r border-gray-200 bg-gray-50/80 backdrop-blur
           transition-transform duration-200
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           md:static md:translate-x-0 md:flex
         `}
       >
@@ -131,8 +135,8 @@ export function AppShell({ children }: AppShellProps) {
                 onClick={() => setSidebarOpen(false)}
                 className={`nav-pill ${
                   active
-                    ? 'bg-black text-white'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-black'
+                    ? "bg-black text-white"
+                    : "text-gray-700 hover:bg-gray-100 hover:text-black"
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -143,43 +147,43 @@ export function AppShell({ children }: AppShellProps) {
         </nav>
 
         <div className="border-t border-gray-200 px-4 py-4 text-xs text-gray-600">
-            <div className=" absolute bottom-0 pb-6">
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-[11px] font-medium uppercase text-black">
-                {user.displayName
-                  ? user.displayName
-                      .split(' ')
-                      .slice(0, 2)
-                      .map((n) => n[0])
-                      .join('')
-                  : user.email?.[0]?.toUpperCase() ?? '?'}
+          <div className=" absolute bottom-0 pb-6">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-[11px] font-medium uppercase text-black">
+                  {user.displayName
+                    ? user.displayName
+                        .split(" ")
+                        .slice(0, 2)
+                        .map((n) => n[0])
+                        .join("")
+                    : (user.email?.[0]?.toUpperCase() ?? "?")}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-medium text-black">
+                    {user.displayName || user.email?.split("@")[0]}
+                  </span>
+                  <span className="text-[10px] text-gray-500">
+                    {user.email}
+                  </span>
+                </div>
               </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-medium text-black">
-                  {user.displayName || user.email?.split('@')[0]}
-                </span>
-                <span className="text-[10px] text-gray-500">
-                  {user.email}
-                </span>
-              </div>
-            </div>
 
-            <button
-              onClick={handleSignOut}
-              className="inline-flex h-7 items-center gap-1 rounded-full border border-gray-300 px-2 text-[11px] text-black hover:bg-black hover:text-white"
-            >
-              <LogOut className="h-3 w-3" />
-              <span>Sign out</span>
-            </button>
-          </div>
-          <div className="flex items-center justify-between pt-1 text-[10px] text-gray-500">
-            <span>Workspace</span>
-            <span className="rounded-full border border-gray-300 bg-white px-2 py-0.5 text-gray-700">
-              Pro
-            </span>
-          </div>
+              <button
+                onClick={handleSignOut}
+                className="inline-flex h-7 items-center gap-1 rounded-full border border-gray-300 px-2 text-[11px] text-black hover:bg-black hover:text-white"
+              >
+                <LogOut className="h-3 w-3" />
+                <span>Sign out</span>
+              </button>
             </div>
+            <div className="flex items-center justify-between pt-1 text-[10px] text-gray-500">
+              <span>Workspace</span>
+              <span className="rounded-full border border-gray-300 bg-white px-2 py-0.5 text-gray-700">
+                Pro
+              </span>
+            </div>
+          </div>
         </div>
       </aside>
 

@@ -10,10 +10,11 @@ import { useEffect, useState } from "react";
 const tableCellClassname =
   "px-4 py-2.5 border-b border-gray-200 group-last:border-b-0";
 
-export default function InvoicesPage() {
+export default function RequestsPage() {
   const [requests, setRequests] = useState<IRequest[]>();
   useEffect(() => {
     getAllRequests().then((r) => {
+      console.log(r)
       setRequests(r);
     });
   }, []);
@@ -24,15 +25,15 @@ export default function InvoicesPage() {
           <header className="mb-4 flex items-center justify-between gap-3">
             <div>
               <h1 className="text-lg font-semibold tracking-tight text-black">
-                Invoices
+                Requests
               </h1>
               <p className="mt-1 text-xs text-gray-500">
                 Centralized storage for listings, contracts, and disclosure
-                invoices.
+                packets.
               </p>
             </div>
             <Link
-              href="/requests/add-new-request"
+              href="/dashboard/requests/add-new-request"
               className="inline-flex items-center gap-1.5 rounded-full border border-gray-300 bg-black text-xs font-medium text-white px-3 py-1.5 hover:bg-black/90"
             >
               <Plus className="h-3.5 w-3.5" color="white" />
@@ -67,7 +68,7 @@ export default function InvoicesPage() {
 
             <tbody>
               {requests?.map((item) => (
-                <tr key={item?.property} className="group hover:bg-gray-50">
+                <tr key={`${item?.property}_${item?.id}`} className="group hover:bg-gray-50">
                   <td className={tableCellClassname}>
                     <span className="truncate text-[12px] text-black">
                       {item?.property}
