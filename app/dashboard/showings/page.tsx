@@ -97,7 +97,7 @@ export default function ShowingsPage() {
             </div>
 
             <Link
-              href="/showings/add-new-showing"
+              href="/dashboard/showings/add-new-showing"
               className="inline-flex items-center gap-1.5 rounded-full border border-gray-300 bg-black text-xs font-medium text-white px-3 py-1.5 hover:bg-black/90"
             >
               <Plus className="h-3.5 w-3.5" color="white" />

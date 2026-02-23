@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { getAuth } from "firebase/auth";
 import * as yup from "yup";
+import { getAddressGeoCoordinates } from "@/lib/utils/geolocation";
 
 const scheme = yup.object({
   property: yup.string().required("Required"),
@@ -33,10 +34,20 @@ function AddnewRequest() {
     status: string;
   }) => {
     setIsLoading(true);
+    const { state, city } = data;
+    const address = `${city},${state}`;
+    let coordinates: { lat: number; lng: number };
+    try {
+      coordinates = await getAddressGeoCoordinates(address);
+    } catch (e) {
+      alert("Error getting gelocation");
+      return;
+    }
+
     try {
       const userId = currentUser?.uid;
-      if (userId) await createNewRequest(data, userId!);
-      router.push("/requests");
+      if (userId) await createNewRequest({ ...data, coordinates }, userId!);
+      router.push("/dashboard/requests");
     } catch (error) {
       alert("Error creating requests");
     }

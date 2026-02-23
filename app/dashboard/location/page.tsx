@@ -1,17 +1,17 @@
 "use client";
 
 import { AppShell } from "@/components/layout/AppShell";
-import { getShowings } from "@/lib/firebase/firestore";
-import { Showing } from "@/lib/firebase/types";
+import { getAllRequests, getShowings } from "@/lib/firebase/firestore";
+import { IRequest, Showing } from "@/lib/firebase/types";
 import { useEffect, useMemo, useState } from "react";
 import {
   GoogleMap,
-  useJsApiLoader,
-  MarkerF,
-  Marker,
   useLoadScript,
+  Marker,
+  Polyline,
 } from "@react-google-maps/api";
 import { useRouter } from "next/navigation";
+import { useGeoLocation } from "@/lib/contexts/GeoLocationContext";
 
 type LocationAgent = {
   id: string;
@@ -27,11 +27,16 @@ type ShowingFilter = {
   label: string;
 };
 
-let demoShowings: ShowingFilter[] = [
+const demoShowings: ShowingFilter[] = [
   { id: "all", label: "All Showings" },
   { id: "s1", label: "2418 Maple St • 10:30" },
   { id: "s2", label: "884 Cedar Ave • 13:00" },
 ];
+
+const containerStyle = {
+  width: "100%",
+  height: "100%",
+};
 
 const demoAgents: LocationAgent[] = [
   {
@@ -52,67 +57,61 @@ const demoAgents: LocationAgent[] = [
   },
 ];
 
+const mapLineStyleOptions = {
+  strokeColor: "#0000FF",
+  strokeOpacity: 1.0,
+  strokeWeight: 3,
+};
+
 export default function LocationPage() {
   const router = useRouter();
-
+  const { location, error: locationError } = useGeoLocation();
+  const [requests, setRequests] = useState<IRequest[]>();
+  const [selectedRequestID, setSelectedRequestID] = useState<string>();
   const [filter, setFilter] = useState<string>("all");
   const [chosenShowing, setChosenShowing] = useState<string>("");
-
   const [inviteEmail, setInviteEmail] = useState("");
-  const [realTimeData, setRealTimeData] = useState(null); // State for proxy data
   const [allShowings, setAllShowings] = useState<Showing[]>([]);
-  const hasMapsKey = !!(
-    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-  );
+  const hasMapsKey = !!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const { isLoaded } = useLoadScript({
-    googleMapsApiKey:
-      process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY! 
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "",
   });
 
-  // The Proxy Call
-  useEffect(() => {
-    const fetchAgentData = async () => {
-      try {
-        const response = await fetch("/api/google-proxy"); // Calling your backend route
-        const data = await response.json();
-        setRealTimeData(data);
-      } catch (error) {
-        console.error("Failed to fetch location data via proxy", error);
-      }
-    };
-
-    fetchAgentData();
-  }, []);
+  // ✅ Synchronous derivation — no useEffect or useState needed
+  const selectedRequest = useMemo(
+    () => requests?.find((r) => r?.id === selectedRequestID),
+    [requests, selectedRequestID],
+  );
 
   useEffect(() => {
-    // Load user's showings
     const loadShowings = async () => {
       try {
         const showings = await getShowings();
-
-        const showingsWithAgents = showings.map((showing, index) => ({
-          ...showing,
-          agentId: index % 2 === 0 ? "s1" : "s2",
-        }));
-
-        setAllShowings(showingsWithAgents);
+        setAllShowings(showings);
       } catch (error) {
         console.error("Error loading showings:", error);
       }
     };
-
     loadShowings();
-
-    // // Subscribe to active showings
-    // const unsubscribe = subscribeToActiveShowings((showings) => {
-    //   setActiveShowings(showings);
-    // });
-    //
-    // return () => {
-    //   unsubscribe();
-    // };
   }, []);
+
+  useEffect(() => {
+    getAllRequests().then((r) => {
+      setRequests(r);
+    });
+  }, []);
+
+  const handleInvite = () => {
+    if (!chosenShowing) {
+      window.alert("Please select a showing first!");
+      return;
+    }
+    if (chosenShowing !== "all") {
+      router.push(`/mylocation?showing=${encodeURIComponent(chosenShowing)}`);
+    }
+    setInviteEmail("");
+  };
 
   const filteredAgents = useMemo(
     () =>
@@ -122,41 +121,23 @@ export default function LocationPage() {
     [filter],
   );
 
-  const handleInvite = () => {
-    if (!chosenShowing) {
-      window.alert("Please Select a showing first!");
-      return;
-    }
-    // Placeholder: in real app, call backend to send invite for /share-location
-    console.log("Send invite to:", inviteEmail);
+  if (!isLoaded) {
+    return (
+      <AppShell>
+        {() => (
+          <div className="flex h-full items-center justify-center text-sm text-gray-500">
+            Loading map…
+          </div>
+        )}
+      </AppShell>
+    );
+  }
 
-    //chat gpt put code here -START
-    console.log("ALL SHOWINGS =====>", allShowings);
-
-    console.log("CHOSEN SHOWINGS =====>", chosenShowing);
-
-    if (chosenShowing && chosenShowing !== "all") {
-      router.push(`/mylocation?showing=${encodeURIComponent(chosenShowing)}`);
-    }
-
-    //chat gpt put code here - END
-
-    setInviteEmail("");
-  };
-
-  const containerStyle = {
-    width: "100%",
-    height: "600px",
-  };
-
-  const center = {
-    lat: 6.5244, // Lagos
-    lng: 3.3792,
-  };
   return (
     <AppShell>
       {() => (
         <div className="flex h-full flex-col text-black">
+          {/* Header */}
           <header className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <h1 className="text-lg font-semibold tracking-tight text-black">
@@ -165,7 +146,13 @@ export default function LocationPage() {
               <p className="mt-1 text-xs text-gray-500">
                 Track agents in the field and share secure location links.
               </p>
+              {!!locationError && (
+                <p className="mt-1 text-xs text-amber-600">
+                  ⚠ {locationError}
+                </p>
+              )}
             </div>
+
             {/* Invite bar */}
             <div className="flex w-full max-w-md items-center gap-2 rounded-full border border-gray-300 bg-white px-3 py-1.5">
               <input
@@ -178,7 +165,7 @@ export default function LocationPage() {
               <button
                 type="button"
                 onClick={handleInvite}
-                className=" inline-flex h-7 items-center rounded-full bg-black px-3 text-[11px] font-medium text-white hover:bg-black/90"
+                className="inline-flex h-7 items-center rounded-full bg-black px-3 text-[11px] font-medium text-white hover:bg-black/90"
               >
                 Send Invite
               </button>
@@ -187,20 +174,23 @@ export default function LocationPage() {
 
           {/* Filters */}
           <div className="mb-3 flex items-center justify-between gap-3 text-xs text-gray-600">
-            <div className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-2 py-1">
-              <span className="text-[11px] text-gray-500">Showing</span>
-              <select
-                value={chosenShowing}
-                onChange={(e) => setChosenShowing(e.target.value)}
-                className="bg-white text-xs text-black focus:outline-none"
-              >
-                {allShowings.map((s) => (
-                  <option key={s.id} value={s.id} className="bg-white">
-                    {s.address}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {!!requests?.length && (
+              <div className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-2 py-1">
+                <span className="text-[11px] text-gray-500">Showing</span>
+                <select
+                  value={selectedRequestID}
+                  onChange={(e) => setSelectedRequestID(e.target.value)}
+                  className="bg-white text-xs text-black focus:outline-none"
+                >
+                  <option value="">— select —</option>
+                  {requests?.map((request) => (
+                    <option key={request?.id} value={request?.id}>
+                      {request?.property}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             <span className="text-[11px] text-gray-500">
               {filteredAgents.length} active agent
               {filteredAgents.length === 1 ? "" : "s"}
@@ -211,16 +201,41 @@ export default function LocationPage() {
           <section className="card-elevated flex-1 overflow-hidden">
             {hasMapsKey ? (
               <div className="h-full w-full">
-                {/* Replace this with GoogleMap/Mapbox implementation wired to filteredAgents */}
-                {isLoaded && (
-                  <GoogleMap
-                    mapContainerStyle={containerStyle}
-                    center={center}
-                    zoom={12}
-                  >
-                    <Marker position={center} />
-                  </GoogleMap>
-                )}
+                <GoogleMap
+                  mapContainerStyle={containerStyle}
+                  center={location!}
+                  zoom={14}
+                >
+                  {/* ✅ Only renders when both location and selected request coordinates exist */}
+                  {location && selectedRequest?.coordinates && (
+                    <Polyline
+                      key={selectedRequestID} // 👈 forces remount on request change
+                      path={[location, selectedRequest.coordinates]}
+                      options={mapLineStyleOptions}
+                    />
+                  )}
+
+                  {location && (
+                    <Marker position={location} title="Your location" />
+                  )}
+
+                  {selectedRequest?.coordinates && (
+                    <Marker
+                      position={selectedRequest.coordinates}
+                      title="Request Location"
+                    />
+                  )}
+
+                  {filteredAgents
+                    .filter((a) => a.id !== "a1")
+                    .map((agent) => (
+                      <Marker
+                        key={agent.id}
+                        position={{ lat: agent.lat, lng: agent.lng }}
+                        title={agent.name}
+                      />
+                    ))}
+                </GoogleMap>
               </div>
             ) : (
               <div className="flex h-full flex-col items-center justify-center gap-4 bg-white">

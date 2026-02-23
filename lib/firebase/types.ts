@@ -1,6 +1,7 @@
 // Firestore Collection Types
 
 import { Timestamp } from "firebase/firestore";
+import { number } from "yup";
 
 export interface User {
   uid: string;
@@ -40,7 +41,7 @@ export interface Listing {
   bedrooms: number;
   bathrooms: number;
   squareFeet?: number;
-  status: 'active' | 'pending' | 'sold' | 'off-market';
+  status: "active" | "pending" | "sold" | "off-market";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -48,7 +49,7 @@ export interface Listing {
 export interface Showing {
   id: string;
   agentId: string;
-  address:string;
+  address: string;
   listingId?: string;
   clientId?: string;
   calendarEventId: string;
@@ -57,7 +58,7 @@ export interface Showing {
   startTime: Date;
   endTime: Date;
   location: string;
-  status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+  status: "scheduled" | "in-progress" | "completed" | "cancelled";
   checkInTime?: Date;
   checkOutTime?: Date;
   createdAt: Date;
@@ -71,8 +72,8 @@ export interface Document {
   listingId?: string;
   showingId?: string;
   name: string;
-  type: 'contract' | 'disclosure' | 'inspection' | 'other';
-  status: 'draft' | 'sent' | 'signed';
+  type: "contract" | "disclosure" | "inspection" | "other";
+  status: "draft" | "sent" | "signed";
   googleDriveFileId?: string;
   googleDriveFileLink?: string;
   signedPdfDriveFileId?: string;
@@ -90,31 +91,28 @@ export interface ActiveShowingLocation {
   timestamp: number;
 }
 
-
-
 export interface IRequest {
-  id:string;
+  id: string;
   property: string;
   city: string;
+  coordinates: { lat: number; lng: number };
   state: string;
   type: string;
   amount: number;
   status: string;
-  userId: string; 
+  userId: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
 
-
 export interface IContact {
-  id:string;
-  userId: string; 
+  id: string;
+  userId: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 
-
-  firstName:string;
-  lastName:string;
-  email:string;
-  phoneNumber:string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
 }
