@@ -1,20 +1,21 @@
 "use client";
 
 import { AppShell } from "@/components/layout/AppShell";
-import { getAllRequests } from "@/lib/firebase/firestore";
-import { IRequest } from "@/lib/firebase/types";
-import { Plus, Search, Folder, FileText } from "lucide-react";
+import { getAllInvoices,  } from "@/lib/firebase/firestore";
+import { IInvoice,  } from "@/types";
+import { Plus, Search, } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import moment from "moment";
 
 const tableCellClassname =
   "px-4 py-2.5 border-b border-gray-200 group-last:border-b-0";
 
 export default function InvoicesPage() {
-  const [requests, setRequests] = useState<IRequest[]>();
+  const [invoices, setInvoices] = useState<IInvoice[]>([]);
   useEffect(() => {
-    getAllRequests().then((r) => {
-      setRequests(r);
+    getAllInvoices().then((r) => {
+      setInvoices(r);
     });
   }, []);
   return (
@@ -32,7 +33,7 @@ export default function InvoicesPage() {
               </p>
             </div>
             <Link
-              href="/dashboard/requests/add-new-request"
+              href="/dashboard/invoices/add-new-invoice"
               className="inline-flex items-center gap-1.5 rounded-full border border-gray-300 bg-black text-xs font-medium text-white px-3 py-1.5 hover:bg-black/90"
             >
               <Plus className="h-3.5 w-3.5" color="white" />
@@ -52,66 +53,57 @@ export default function InvoicesPage() {
           <table className="w-full border-separate border-spacing-0 text-[11px] text-gray-500 card-elevated">
             <thead>
               <tr>
-                {["Property", "Type", "Amount", "Date added", "Status"].map(
-                  (header) => (
-                    <th
-                      key={header}
-                      className="border-b border-gray-200 px-4 py-2.5 text-left font-medium text-gray-600"
-                    >
-                      {header}
-                    </th>
-                  ),
-                )}
+                {[
+                  "Company Name",
+                  "Address",
+                  "Phone Number",
+                  "Date added",
+                  "Number of Items",
+                ].map((header) => (
+                  <th
+                    key={header}
+                    className="border-b border-gray-200 px-4 py-2.5 text-left font-medium text-gray-600"
+                  >
+                    {header}
+                  </th>
+                ))}
               </tr>
             </thead>
 
             <tbody>
-              {requests?.map((item) => (
-                <tr key={item?.property} className="group hover:bg-gray-50">
+              {invoices?.map((item, index) => (
+                <tr
+                  key={`${item?.companyName}_${index}`}
+                  className="group hover:bg-gray-50"
+                >
                   <td className={tableCellClassname}>
                     <span className="truncate text-[12px] text-black">
-                      {item?.property}
+                      {item?.companyName}
                     </span>
                   </td>
 
                   <td className={tableCellClassname}>
                     <div className="flex min-w-0 items-center gap-2">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-gray-200 bg-gray-100">
-                        {item.type === "buy" ? (
-                          <Folder className="h-3.5 w-3.5 text-gray-700" />
-                        ) : (
-                          <FileText className="h-3.5 w-3.5 text-gray-700" />
-                        )}
-                      </div>
-                      <span className="truncate text-[12px] text-black capitalize">
-                        {item?.type}
-                      </span>
+                      {item.address}
                     </div>
                   </td>
 
-                  <td className={tableCellClassname}>
-                    <span className="truncate text-[12px] text-black">
-                      {item?.amount}
-                    </span>
-                  </td>
+                  <td className={tableCellClassname}>{item.phoneNumber}</td>
 
                   <td className={tableCellClassname}>
                     <span className="text-[11px] text-gray-500">
-                      {item?.createdAt?.toDate()?.toDateString()}
+                      {moment(item.createdAt).format("ddd M YYYY")}
                     </span>
                   </td>
 
                   <td className={tableCellClassname}>
                     <span
-                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                        item.status === "Active"
-                          ? "border border-emerald-500/30 bg-emerald-50 text-emerald-700"
-                          : item.status === "Closed"
-                            ? "border border-gray-300 bg-gray-100 text-gray-700"
-                            : "border border-sky-500/30 bg-sky-50 text-sky-700"
-                      }`}
+                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium 
+                           "border border-emerald-500/30 bg-emerald-50 text-emerald-700"
+                          
+                      `}
                     >
-                      {item.status}
+                      {item?.items?.length}
                     </span>
                   </td>
                 </tr>

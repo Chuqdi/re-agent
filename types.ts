@@ -105,6 +105,18 @@ export interface IRequest {
   updatedAt: Timestamp;
 }
 
+export interface IShowing {
+  id: string;
+  showingID: string;
+  address: string;
+  city: string;
+  state: string;
+  showingTime: string;
+  invitee: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface IContact {
   id: string;
   userId: string;
@@ -115,4 +127,22 @@ export interface IContact {
   lastName: string;
   email: string;
   phoneNumber: string;
+}
+
+export interface IInvoiceItem {
+  id: string;
+  description: string;
+  quantity: string;
+  rate: string;
+  tax: string;
+  amount: string;
+}
+export interface IInvoice {
+  createdAt:string;
+  updatedAt:string;
+  invoiceID:string;
+  companyName: string;
+  address: string;
+  phoneNumber: string;
+  items: IInvoiceItem[];
 }

@@ -9,7 +9,7 @@ import {
   updateShowingLocation,
 } from '@/lib/firebase/realtime';
 import { getShowingsByAgent, getUsersByIds, updateShowing } from '@/lib/firebase/firestore';
-import { Showing, ActiveShowingLocation } from '@/lib/firebase/types';
+import { Showing, ActiveShowingLocation } from '@/types';
 
 interface LiveAgentTrackerProps {
   user: any;

@@ -22,7 +22,9 @@ import {
   Document,
   IRequest,
   IContact,
-} from "./types";
+  IShowing,
+  IInvoice,
+} from "../../types";
 import { COLLECTIONS } from ".";
 
 // Helper to convert Firestore Timestamp to Date
@@ -405,22 +407,22 @@ export const createNewRequest = async (
   userId: string,
 ) => {
   try {
-    const docRef = await addDoc(collection(db, COLLECTIONS.REQUESTS), {
+    const docRef = doc(collection(db, COLLECTIONS.REQUESTS));
+
+    await setDoc(docRef, {
       ...propertyData,
-      userId: userId, // Store user ID as reference
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
+      userId,
+      requestID: docRef.id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     });
 
-    console.log("Property created with ID: ", docRef.id);
     return docRef.id;
   } catch (error) {
-    console.error("Error creating property: ", error);
+    console.error("Error creating property:", error);
     throw error;
   }
 };
-
-
 
 export const getAllRequests: () => Promise<IRequest[]> = async () => {
   try {
@@ -442,8 +444,6 @@ export const getAllRequests: () => Promise<IRequest[]> = async () => {
   }
 };
 
-
-
 export const createNewContact = async (
   contactData: Omit<IContact, "id" | "userId" | "createdAt" | "updatedAt">,
   userId: string,
@@ -464,14 +464,9 @@ export const createNewContact = async (
   }
 };
 
-
-
 export const getAllContacts: () => Promise<IContact[]> = async () => {
   try {
-    const q = query(
-      collection(db, COLLECTIONS.CONTACTS),
-      orderBy("createdAt"),
-    );
+    const q = query(collection(db, COLLECTIONS.CONTACTS), orderBy("createdAt"));
 
     const querySnapshot = await getDocs(q);
     const contacts = querySnapshot.docs.map((doc) => ({
@@ -482,6 +477,66 @@ export const getAllContacts: () => Promise<IContact[]> = async () => {
     return contacts;
   } catch (error) {
     console.error("Error fetching contacts:", error);
+    throw error;
+  }
+};
+
+//SHOWING
+
+export const createNewShowing = async (
+  propertyData: Omit<IShowing, "id" | "showingID" | "createdAt" | "updatedAt">,
+) => {
+  try {
+    const docRef = doc(collection(db, COLLECTIONS.SHOWINGS));
+
+    await setDoc(docRef, {
+      ...propertyData,
+      showingID: docRef.id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    return docRef.id;
+  } catch (error) {
+    console.error("Error creating showing:", error);
+    throw error;
+  }
+};
+
+//INVOICES
+
+export const createNewInvoice = async (
+  propertyData: Omit<IInvoice, "id" | "invoiceID" | "createdAt" | "updatedAt">,
+) => {
+  try {
+    const docRef = doc(collection(db, COLLECTIONS.INVOICES));
+
+    await setDoc(docRef, {
+      ...propertyData,
+      invoiceID: docRef.id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    return docRef.id;
+  } catch (error) {
+    console.error("Error creating showing:", error);
+    throw error;
+  }
+};
+
+export const getAllInvoices: () => Promise<IInvoice[]> = async () => {
+  try {
+    const q = query(collection(db, COLLECTIONS.INVOICES), orderBy("createdAt"));
+
+    const querySnapshot = await getDocs(q);
+    const invoices = querySnapshot.docs.map((doc) => ({
+      ...doc.data(),
+    })) as IInvoice[];
+
+    return invoices;
+  } catch (error) {
+    console.error("Error fetching invoices:", error);
     throw error;
   }
 };
