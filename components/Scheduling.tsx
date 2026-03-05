@@ -6,7 +6,7 @@ import {
   createShowing,
   updateShowing,
 } from '@/lib/firebase/firestore';
-import { Showing } from '@/lib/firebase/types';
+import { Showing } from '@/types';
 import { signInWithGoogle } from '@/lib/firebase/auth';
 
 interface SchedulingProps {

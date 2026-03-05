@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { createClient } from '@/lib/firebase/firestore';
-import { Client } from '@/lib/firebase/types';
+import { Client } from '@/types';
 
 interface ClientFormProps {
   agentId: string;

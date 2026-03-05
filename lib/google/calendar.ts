@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import { Showing } from '../firebase/types';
+import { Showing } from '../../types';
 
 export interface CalendarEvent {
   id: string;

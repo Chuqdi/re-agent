@@ -1,6 +1,6 @@
 import { ref, set, onValue, off, remove } from 'firebase/database';
 import { auth, realtimeDb } from './config';
-import { ActiveShowingLocation } from './types';
+import { ActiveShowingLocation } from '../../types';
 
 // Realtime Database paths
 const ACTIVE_SHOWINGS_PATH = 'active_showings';

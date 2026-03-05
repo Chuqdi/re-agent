@@ -9,7 +9,7 @@ import {
   updateDocument,
 } from '@/lib/firebase/firestore';
 import { getClientsByAgent } from '@/lib/firebase/firestore';
-import { Document, Client } from '@/lib/firebase/types';
+import { Document, Client } from '@/types';
 import ClientForm from './ClientForm';
 import { signInWithGoogle } from '@/lib/firebase/auth';
 

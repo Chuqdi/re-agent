@@ -1,14 +1,70 @@
 "use client";
 import AppShell from "@/components/layout/AppShell";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import SelectOption from "@/components/ui/SelectOption";
+import { createNewShowing, getAllContacts } from "@/lib/firebase/firestore";
+import { IContact } from "@/types";
+import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import * as yup from "yup";
+
+const scheme = yup.object({
+  address: yup.string().required("Required"),
+  city: yup.string().required("Required"),
+  state: yup.string().required("Required"),
+  showingTime: yup.string().required("Required"),
+  invitee: yup.string().required("Required"),
+});
 
 function AddNewShowing() {
   const router = useRouter();
+  const [contacts, setContacts] = useState<IContact[]>();
+  const [isLoading, setIsLoading] = useState(false);
+  const onSubmit = async (data: {
+    address: string;
+    city: string;
+    state: string;
+    showingTime: string;
+    invitee: string;
+  }) => {
+    setIsLoading(true);
+    try {
+      const requestData = {
+        ...data,
+        showingTime: new Date(data.showingTime).toISOString(),
+      };
+      await createNewShowing(requestData);
+      router.push("/dashboard/showings");
+    } catch (error) {
+      alert("Error creating requests");
+    }
+    setIsLoading(false);
+  };
+  const { values, handleSubmit, handleChange, errors, touched } = useFormik({
+    validationSchema: scheme,
+    onSubmit,
+    initialValues: {
+      address: "",
+      city: "",
+      state: "",
+      showingTime: "",
+      invitee: "",
+    },
+  });
+
+  useEffect(() => {
+    getAllContacts().then((r) => {
+      setContacts(r);
+    });
+  }, []);
+
   return (
     <AppShell>
       {() => (
         <div className="w-full md:w-[80%] mx-auto bg-[#e8e8e82f] my-8 p-4 md:p-8 rounded-lg">
-          <form onSubmit={() => {}} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-8">
             <div>
               <h1 className="text-lg font-semibold tracking-tight text-black">
                 Add New Showing
@@ -18,101 +74,77 @@ function AddNewShowing() {
               </p>
             </div>
             <div className="space-y-4">
-              <div className="flex items-center gap-4">
+              <div className="flex items-start gap-4">
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Product Name
-                  </label>
-                  <input
-                    // value={email}
-                    // onChange={(e) => setEmail(e.target.value)}
+                  <Input
+                    label="Address"
+                    value={values.address}
+                    onChange={handleChange("address")}
+                    errorMessage={errors.address}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="eg. 3 Bedroom Terrace. Ikoyi"
                   />
                 </div>
 
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Type
-                  </label>
-                  <input
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  <Input
+                    label="State"
+                    value={values.state}
+                    onChange={handleChange("state")}
+                    errorMessage={errors.state}
                     placeholder="eg. Rent"
                   />
                 </div>
-              </div>
 
-              <div className="flex items-center gap-4">
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Price
-                  </label>
-                  <input
-                    type="number"
-                    // value={email}
-                    // onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black-500 focus:border-black-500"
+                  <Input
+                    label="City"
+                    value={values.city}
+                    onChange={handleChange("city")}
+                    errorMessage={errors.city}
                     placeholder="eg. 30"
-                  />
-                </div>
-
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Harvest Cycle
-                  </label>
-                  <input
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder=""
                   />
                 </div>
               </div>
 
               <div className="flex items-center gap-4">
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Unit Quantity
-                  </label>
-                  <input
-                    type="number"
-                    // value={email}
-                    // onChange={(e) => setEmail(e.target.value)}
+                  <Input
+                    label="Showing Time"
+                    value={values.showingTime}
+                    onChange={handleChange("showingTime")}
+                    errorMessage={errors.showingTime}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black-500 focus:border-black-500"
-                    placeholder="eg. 30"
+                    type="date"
                   />
                 </div>
 
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Product Image
-                  </label>
-                  <input
-                    type="file"
+                  <SelectOption
+                    value={values.invitee}
+                    onChange={handleChange("invitee")}
+                    errorMessage={errors.invitee}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder=""
-                  />
+                    label="Invitee"
+                  >
+                    <option value="">Select invitee</option>
+                    {contacts?.map((contact) => (
+                      <option key={contact?.id}>
+                        {contact?.firstName} {contact?.lastName}
+                      </option>
+                    ))}
+                  </SelectOption>
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <button
+              <Button
+                title="Cancel"
+                variant="secondary"
+                type="button"
                 onClick={() => router.back()}
-                type="submit"
-                className="w-full bg-white border hover:bg-[#ecececef] text-black font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="w-full bg-black hover:bg-[#000000ef] text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Add Showing
-              </button>
+              />
+              <Button isLoading={isLoading} title="Add Showing" type="submit" />
             </div>
           </form>
         </div>

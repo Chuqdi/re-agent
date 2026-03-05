@@ -2,7 +2,7 @@
 
 import { AppShell } from "@/components/layout/AppShell";
 import { getAllRequests, getShowings } from "@/lib/firebase/firestore";
-import { IRequest, Showing } from "@/lib/firebase/types";
+import { IRequest, Showing } from "@/types";
 import { useEffect, useMemo, useState } from "react";
 import {
   GoogleMap,
@@ -12,6 +12,7 @@ import {
 } from "@react-google-maps/api";
 import { useRouter } from "next/navigation";
 import { useGeoLocation } from "@/lib/contexts/GeoLocationContext";
+import { mapContainerStyle, mapLineStyleOptions } from "@/lib/utils";
 
 type LocationAgent = {
   id: string;
@@ -33,11 +34,6 @@ const demoShowings: ShowingFilter[] = [
   { id: "s2", label: "884 Cedar Ave • 13:00" },
 ];
 
-const containerStyle = {
-  width: "100%",
-  height: "100%",
-};
-
 const demoAgents: LocationAgent[] = [
   {
     id: "a1",
@@ -57,19 +53,11 @@ const demoAgents: LocationAgent[] = [
   },
 ];
 
-const mapLineStyleOptions = {
-  strokeColor: "#0000FF",
-  strokeOpacity: 1.0,
-  strokeWeight: 3,
-};
-
 export default function LocationPage() {
-  const router = useRouter();
   const { location, error: locationError } = useGeoLocation();
   const [requests, setRequests] = useState<IRequest[]>();
   const [selectedRequestID, setSelectedRequestID] = useState<string>();
   const [filter, setFilter] = useState<string>("all");
-  const [chosenShowing, setChosenShowing] = useState<string>("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [allShowings, setAllShowings] = useState<Showing[]>([]);
   const hasMapsKey = !!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -103,12 +91,16 @@ export default function LocationPage() {
   }, []);
 
   const handleInvite = () => {
-    if (!chosenShowing) {
+    if (!selectedRequest) {
       window.alert("Please select a showing first!");
       return;
     }
-    if (chosenShowing !== "all") {
-      router.push(`/mylocation?showing=${encodeURIComponent(chosenShowing)}`);
+    if (selectedRequest?.coordinates) {
+      const url = `/dashboard/mylocation?data=${encodeURIComponent(
+        JSON.stringify(selectedRequest),
+      )}`;
+
+      window.open(url, "_blank");
     }
     setInviteEmail("");
   };
@@ -147,9 +139,7 @@ export default function LocationPage() {
                 Track agents in the field and share secure location links.
               </p>
               {!!locationError && (
-                <p className="mt-1 text-xs text-amber-600">
-                  ⚠ {locationError}
-                </p>
+                <p className="mt-1 text-xs text-amber-600">⚠ {locationError}</p>
               )}
             </div>
 
@@ -202,7 +192,7 @@ export default function LocationPage() {
             {hasMapsKey ? (
               <div className="h-full w-full">
                 <GoogleMap
-                  mapContainerStyle={containerStyle}
+                  mapContainerStyle={mapContainerStyle}
                   center={location!}
                   zoom={14}
                 >

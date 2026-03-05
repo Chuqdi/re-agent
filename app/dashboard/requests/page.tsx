@@ -2,7 +2,7 @@
 
 import { AppShell } from "@/components/layout/AppShell";
 import { getAllRequests } from "@/lib/firebase/firestore";
-import { IRequest } from "@/lib/firebase/types";
+import { IRequest } from "@/types";
 import { Plus, Search, Folder, FileText } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";

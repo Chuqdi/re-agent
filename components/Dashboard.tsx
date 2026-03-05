@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import LiveAgentTracker from './LiveAgentTracker';
 import DocumentManager from './DocumentManager';
 import Scheduling from './Scheduling';
-import { User } from '@/lib/firebase/types';
+import { User } from '@/types';
 
 interface DashboardProps {
   user: any;

@@ -66,8 +66,8 @@ function SettingsPage() {
   return (
     <AppShell>
       {() => (
-        <div className="flex h-full flex-col text-black">
-          <header className="mb-4 flex items-center justify-between gap-3">
+        <div className="flex h-full w-full md:w-[50%] mx-auto  flex-col text-black">
+          <header className="mb-4 flex w-full justify-between gap-3">
             <div>
               <h1 className="text-lg font-semibold tracking-tight text-black">
                 Setting
@@ -76,7 +76,7 @@ function SettingsPage() {
             </div>
           </header>
 
-          <div className="flex items-start gap-8">
+          <div className=" w-full items-start gap-8">
             <form
               onSubmit={handleSubmit}
               className="card-elevated p-6 flex flex-col gap-8 w-full"
@@ -84,7 +84,7 @@ function SettingsPage() {
               <h1 className="text-lg font-semibold tracking-tight text-black">
                 Reset Password
               </h1>
-              <div className="flex flex-col gap-4">
+              <div className="flex w-full flex-col gap-4">
                 <Input
                   label="Current Password"
                   placeholder="Current Password"

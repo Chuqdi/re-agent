@@ -2,5 +2,8 @@
 
 export const COLLECTIONS ={
     "REQUESTS":'requests',
-    "CONTACTS":'contacts'
+    "CONTACTS":'contacts',
+    "SHOWINGS":'showings',
+    "INVOICES":"invoices"
+
 }

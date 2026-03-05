@@ -2,7 +2,7 @@
 
 import { AppShell } from "@/components/layout/AppShell";
 import { getAllContacts, getAllRequests } from "@/lib/firebase/firestore";
-import { IContact } from "@/lib/firebase/types";
+import { IContact } from "@/types";
 import { ArrowRight, Plus } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
