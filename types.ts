@@ -105,6 +105,21 @@ export interface IRequest {
   updatedAt: Timestamp;
 }
 
+
+export interface IUser {
+  uid: string;
+  property: string;
+  email: string;
+  address_coordinates: { lat: number; lng: number };
+ 
+  fullName: string;
+  displayName: string;
+  
+  location_updated_at: Timestamp;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
 export interface IShowing {
   id: string;
   showingID: string;

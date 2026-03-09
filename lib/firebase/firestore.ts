@@ -24,6 +24,7 @@ import {
   IContact,
   IShowing,
   IInvoice,
+  IUser,
 } from "../../types";
 import { COLLECTIONS } from ".";
 
@@ -436,6 +437,27 @@ export const getAllRequests: () => Promise<IRequest[]> = async () => {
       id: doc.id,
       ...doc.data(),
     })) as IRequest[];
+
+    return requests;
+  } catch (error) {
+    console.error("Error fetching requests:", error);
+    throw error;
+  }
+};
+
+
+export const getAllUsers: () => Promise<IUser[]> = async () => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.USERS),
+      orderBy("createdAt", "desc"),
+    );
+
+    const querySnapshot = await getDocs(q);
+    const requests = querySnapshot.docs.map((doc) => ({
+      uid: doc.id,
+      ...doc.data(),
+    })) as IUser[];
 
     return requests;
   } catch (error) {
