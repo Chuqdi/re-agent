@@ -14,7 +14,7 @@ import {
   useLoadScript,
 } from "@react-google-maps/api";
 import { getShowing } from "@/lib/firebase/firestore";
-import { getAllUsers,getAllRequests } from "@/lib/firebase/firestore";
+import { getAllUsers,getAllRequests,getShowingByID } from "@/lib/firebase/firestore";
 import { IRequest,IUser, Showing } from "@/types";
 import { useGeoLocation } from "@/lib/contexts/GeoLocationContext";
 import { mapContainerStyle, mapLineStyleOptions } from "@/lib/utils";
@@ -67,11 +67,35 @@ function MyLocationContent() {
   }, []);
 
 
-  const selectedRequests = useMemo(() => {
-    if (search.get("data")) {
-      return JSON.parse(search.get("data")!) as IRequest;
+  //const selectedRequests = useMemo(() => {
+  //  if (search.get("data")) {
+  //    return JSON.parse(search.get("data")!) as IRequest;
+  //  }
+  //}, [search]);
+
+
+//i have to update state of selectedUser and searching firebase, so I can filter out users who have been invited
+  const [selectedRequests, setSelectedRequests] = useState<IRequest | null>(null);
+
+useEffect(() => {
+  const data = search.get("data");
+
+  if (!data) return;
+
+  const parsed = JSON.parse(data) as IRequest;
+
+  setSelectedRequests(parsed);
+
+  // fetch latest version from firestore
+  getShowingByID(parsed.showingID).then((updatedShowing) => {
+    if (updatedShowing) {
+      setSelectedRequests(updatedShowing);
     }
-  }, [search]);
+  });
+}, [search]);
+
+
+
 
   console.log("PAH COOL SCULTPING--->",selectedRequests)
 
@@ -187,7 +211,12 @@ function MyLocationContent() {
             </thead>
 
             <tbody>
-              {users?.map((item) => {
+            {users
+          ?.filter((item) => {
+            if (!selectedRequests?.invitees) return true;
+            return !selectedRequests.invitees.includes(item.email);
+          })
+          .map((item) => {
 
                    const myLocation = {
                      latitude: 6.5244,

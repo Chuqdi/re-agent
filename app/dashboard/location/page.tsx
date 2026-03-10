@@ -1,7 +1,7 @@
 "use client";
 
 import { AppShell } from "@/components/layout/AppShell";
-import { getAllRequests, getShowings } from "@/lib/firebase/firestore";
+import { getAllRequests, getShowings,updateShowingInvitees } from "@/lib/firebase/firestore";
 import { IRequest, Showing } from "@/types";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -57,6 +57,7 @@ export default function LocationPage() {
   const { location, error: locationError } = useGeoLocation();
   const [requests, setRequests] = useState<IRequest[]>();
   const [selectedRequestID, setSelectedRequestID] = useState<string>();
+
   const [filter, setFilter] = useState<string>("all");
   const [inviteEmail, setInviteEmail] = useState("");
   const [allShowings, setAllShowings] = useState<Showing[]>([]);
@@ -66,11 +67,35 @@ export default function LocationPage() {
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "",
   });
 
+
+   //OLD APPLICATION STYLE
   // ✅ Synchronous derivation — no useEffect or useState needed
-  const selectedRequest = useMemo(
-    () => requests?.find((r) => r?.id === selectedRequestID),
-    [requests, selectedRequestID],
-  );
+ // const selectedRequest = useMemo(
+ //   () => requests?.find((r) => r?.id === selectedRequestID),
+ //   [requests, selectedRequestID],
+ // );
+
+
+
+ const [selectedRequest, setSelectedRequest] = useState<IRequest | undefined>();
+
+
+ useEffect(() => {
+  getAllRequests().then((r) => {
+    setRequests(r);
+  });
+}, []);
+
+
+
+ useEffect(() => {
+  if (!allShowings || !selectedRequestID) return;
+ 
+   const found = allShowings.find((r) => r?.showingID === selectedRequestID);
+   setSelectedRequest(found);
+ }, [allShowings, selectedRequestID]);
+ 
+
 
   useEffect(() => {
     const loadShowings = async () => {
@@ -84,11 +109,6 @@ export default function LocationPage() {
     loadShowings();
   }, []);
 
-  useEffect(() => {
-    getAllRequests().then((r) => {
-      setRequests(r);
-    });
-  }, []);
 
 
   const emailHTML = `
@@ -162,9 +182,16 @@ export default function LocationPage() {
   
    
   
-    setInviteEmail("");
+    
   
     try {
+
+
+   // updateShowingInvitees()
+
+    await updateShowingInvitees(selectedRequest && selectedRequest.showingID, inviteEmail);
+
+        
       const res = await fetch("/api/send-email", {
         method: "POST",
         headers: {
@@ -183,6 +210,7 @@ export default function LocationPage() {
   
       if (result.success) {
         console.log("Email sent!");
+        setInviteEmail("");
 
         if (selectedRequest?.coordinates) {
           const url = `/dashboard/mylocation?data=${encodeURIComponent(
@@ -261,18 +289,23 @@ export default function LocationPage() {
 
           {/* Filters */}
           <div className="mb-3 flex items-center justify-between gap-3 text-xs text-gray-600">
-            {!!requests?.length && (
+            {!!allShowings?.length && (
               <div className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-2 py-1">
                 <span className="text-[11px] text-gray-500">Showing</span>
                 <select
                   value={selectedRequestID}
-                  onChange={(e) => setSelectedRequestID(e.target.value)}
+                  onChange={(e) => {
+
+                    console.log("WHAT IS E.TARGET.VALUE--->",e.target.value)
+                    setSelectedRequestID(e.target.value && e.target.value); /*setSelectedRequest(e.target.value)*/
+                  
+                  } }
                   className="bg-white text-xs text-black focus:outline-none"
                 >
                   <option value="">— select —</option>
-                  {requests?.map((request) => (
-                    <option key={request?.id} value={request?.id}>
-                      {request?.property}
+                  {allShowings?.map((showing) => (
+                    <option key={showing?.showingID} value={showing?.showingID}>
+                      {showing?.address}
                     </option>
                   ))}
                 </select>

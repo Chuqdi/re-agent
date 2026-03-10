@@ -11,6 +11,7 @@ import {
   orderBy,
   Timestamp,
   addDoc,
+  arrayUnion,
   QueryConstraint,
 } from "firebase/firestore";
 import { db } from "./config";
@@ -521,6 +522,38 @@ export const createNewShowing = async (
     return docRef.id;
   } catch (error) {
     console.error("Error creating showing:", error);
+    throw error;
+  }
+};
+
+
+
+export const getShowingByID = async (showingID: string) => {
+  const ref = doc(db, COLLECTIONS.SHOWINGS, showingID);
+  const snapshot = await getDoc(ref);
+
+  if (!snapshot.exists()) return null;
+
+  return snapshot.data();
+};
+
+
+
+export const updateShowingInvitees = async (
+  showingID: string,
+  newEmail: string
+) => {
+  try {
+    const showingRef = doc(db, COLLECTIONS.SHOWINGS, showingID);
+
+    await updateDoc(showingRef, {
+      invitees: arrayUnion(newEmail),
+      updatedAt: new Date().toISOString(),
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Error updating showing invitees:", error);
     throw error;
   }
 };
