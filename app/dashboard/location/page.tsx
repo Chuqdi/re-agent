@@ -90,20 +90,117 @@ export default function LocationPage() {
     });
   }, []);
 
-  const handleInvite = () => {
+
+  const emailHTML = `
+      <p> <strong>Hello, </strong>,</p>
+    
+      <p>You have been invited to view the property:
+      
+      ${selectedRequest && selectedRequest.property}
+      </p>
+    
+     
+
+      <p >
+        <a 
+          href="https://re-agents-iota.vercel.app/dashboard/mylocation?data=${encodeURIComponent(JSON.stringify(selectedRequest))}" 
+          target="_blank"
+          style="color:black; text-decoration:none;"
+        >
+          Please Click Here to view
+        </a>
+    </p>
+
+
+     
+      <br/><br/>
+      <p>Warm Regards,</p>
+      <p>– John</p>
+
+
+
+
+    <br/><br/>
+    
+    <p style="text-align:center; font-size:12px; color:#888; margin:20px 0;">
+        <a 
+          href="https://re-agents-iota.vercel.app/dashboard" 
+          target="_blank"
+          style="color:#888; text-decoration:none;"
+        >
+          Powered by RE-agents
+        </a>
+    </p>
+    
+    `;
+    
+
+  //const handleInvite = () => {
+  //  if (!selectedRequest) {
+  //    window.alert("Please select a showing first!");
+  //    return;
+  //  }
+  //  if (selectedRequest?.coordinates) {
+  //    const url = `/dashboard/mylocation?data=${encodeURIComponent(
+  //      JSON.stringify(selectedRequest),
+  //    )}`;
+//
+  //    window.open(url, "_blank");
+  //  }
+  //  setInviteEmail("");
+//
+//
+  //  
+  //};
+
+
+  const handleInvite = async () => {
     if (!selectedRequest) {
       window.alert("Please select a showing first!");
       return;
     }
-    if (selectedRequest?.coordinates) {
-      const url = `/dashboard/mylocation?data=${encodeURIComponent(
-        JSON.stringify(selectedRequest),
-      )}`;
-
-      window.open(url, "_blank");
-    }
+  
+   
+  
     setInviteEmail("");
+  
+    try {
+      const res = await fetch("/api/send-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          to: inviteEmail && inviteEmail,
+          subject: "Your Invitation to Our Showing",
+          htmlMessage: emailHTML,
+          name: "John Test",
+          userEmail:'info@reagents.com',
+        }),
+      });
+  
+      const result = await res.json();
+  
+      if (result.success) {
+        console.log("Email sent!");
+
+        if (selectedRequest?.coordinates) {
+          const url = `/dashboard/mylocation?data=${encodeURIComponent(
+            JSON.stringify(selectedRequest)
+          )}`;
+      
+          window.open(url, "_blank");
+        }
+
+      } else {
+        console.error("Email failed");
+      }
+  
+    } catch (error) {
+      console.error("Error sending email:", error);
+    }
   };
+
 
   const filteredAgents = useMemo(
     () =>
