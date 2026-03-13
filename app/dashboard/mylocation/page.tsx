@@ -119,7 +119,7 @@ useEffect(() => {
     <AppShell>
       {() => (
         <>
-        <div className="flex h-full flex-col text-black">
+        <div className="flex h-full min-w-0 flex-col text-black">
           <header className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <h1 className="text-lg font-semibold tracking-tight text-black">
@@ -172,7 +172,7 @@ useEffect(() => {
           </section>
 
 
-          <div className="flex h-full flex-col text-black">
+          <div className="flex h-full min-w-0 flex-col text-black">
           <header className="mb-4 flex items-center justify-between gap-3">
             <div>
               <h1 className="text-lg font-semibold tracking-tight text-black">
@@ -185,38 +185,39 @@ useEffect(() => {
            
           </header>
 
-          <div className="card-elevated mb-4 flex items-center gap-2 px-3 py-2.5">
+          <div className="card-elevated mb-4 flex min-w-0 items-center gap-2 px-3 py-2.5">
             <Search className="h-3.5 w-3.5 text-gray-500" />
             <input
               type="text"
               placeholder="Search users"
-              className="h-7 flex-1 bg-transparent text-xs text-black placeholder:text-gray-400 focus:outline-none"
+              className="h-7 min-w-0 flex-1 bg-transparent text-xs text-black placeholder:text-gray-400 focus:outline-none"
             />
           </div>
 
-          <table className="w-full border-separate border-spacing-0 text-[11px] text-gray-500 card-elevated">
-            <thead>
-              <tr>
-                {["Name", "Display Name", "Email", "Date added", "Distance From Showing"].map(
-                  (header) => (
-                    <th
-                      key={header}
-                      className="border-b border-gray-200 px-4 py-2.5 text-left font-medium text-gray-600"
-                    >
-                      {header}
-                    </th>
-                  ),
-                )}
-              </tr>
-            </thead>
+          <div className="w-full min-w-0 max-w-full overflow-x-auto">
+            <table className="card-elevated min-w-[760px] w-full border-separate border-spacing-0 text-[11px] text-gray-500">
+              <thead>
+                <tr>
+                  {["Name", "Display Name", "Email", "Date added", "Distance From Showing"].map(
+                    (header) => (
+                      <th
+                        key={header}
+                        className="border-b border-gray-200 px-4 py-2.5 text-left font-medium text-gray-600"
+                      >
+                        {header}
+                      </th>
+                    ),
+                  )}
+                </tr>
+              </thead>
 
-            <tbody>
-            {users
-          ?.filter((item) => {
-            if (!selectedRequests?.invitees) return true;
-            return !selectedRequests.invitees.includes(item.email);
-          })
-          .map((item) => {
+              <tbody>
+              {users
+            ?.filter((item) => {
+              if (!selectedRequests?.invitees) return true;
+              return !selectedRequests.invitees.includes(item.email);
+            })
+            .map((item) => {
 
                    const myLocation = {
                      latitude: 6.5244,
@@ -271,8 +272,9 @@ useEffect(() => {
               )
 
               })}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
 
 
@@ -302,7 +304,7 @@ useEffect(() => {
   return (
     <>
       
-        <div className="flex h-full flex-col text-black">
+        <div className="flex h-full min-w-0 flex-col text-black">
           <header className="mb-4 flex items-center justify-between gap-3">
             <div>
               <h1 className="text-lg font-semibold tracking-tight text-black">
@@ -315,39 +317,40 @@ useEffect(() => {
            
           </header>
 
-          <div className="card-elevated mb-4 flex items-center gap-2 px-3 py-2.5">
+          <div className="card-elevated mb-4 flex min-w-0 items-center gap-2 px-3 py-2.5">
             <Search className="h-3.5 w-3.5 text-gray-500" />
             <input
               type="text"
               placeholder="Search users"
-              className="h-7 flex-1 bg-transparent text-xs text-black placeholder:text-gray-400 focus:outline-none"
+              className="h-7 min-w-0 flex-1 bg-transparent text-xs text-black placeholder:text-gray-400 focus:outline-none"
             />
           </div>
 
-          <table className="w-full border-separate border-spacing-0 text-[11px] text-gray-500 card-elevated">
-            <thead>
-              <tr>
-                {["Name", "Display Name", "Email", "Date added", "GPS Location"].map(
-                  (header) => (
-                    <th
-                      key={header}
-                      className="border-b border-gray-200 px-4 py-2.5 text-left font-medium text-gray-600"
-                    >
-                      {header}
-                    </th>
-                  ),
-                )}
-              </tr>
-            </thead>
+          <div className="w-full min-w-0 max-w-full overflow-x-auto">
+            <table className="card-elevated min-w-[760px] w-full border-separate border-spacing-0 text-[11px] text-gray-500">
+              <thead>
+                <tr>
+                  {["Name", "Display Name", "Email", "Date added", "GPS Location"].map(
+                    (header) => (
+                      <th
+                        key={header}
+                        className="border-b border-gray-200 px-4 py-2.5 text-left font-medium text-gray-600"
+                      >
+                        {header}
+                      </th>
+                    ),
+                  )}
+                </tr>
+              </thead>
 
-            <tbody>
-              {users?.map((item) => (
-                <tr key={`${item?.uid}`} className="group hover:bg-gray-50">
-                  <td className={tableCellClassname}>
-                    <span className="truncate text-[12px] text-black">
-                      {item?.fullName}
-                    </span>
-                  </td>
+              <tbody>
+                {users?.map((item) => (
+                  <tr key={`${item?.uid}`} className="group hover:bg-gray-50">
+                    <td className={tableCellClassname}>
+                      <span className="truncate text-[12px] text-black">
+                        {item?.fullName}
+                      </span>
+                    </td>
 
                   <td className={tableCellClassname}>
                     <div className="flex min-w-0 items-center gap-2">
@@ -370,19 +373,20 @@ useEffect(() => {
                     </span>
                   </td>
 
-                  <td className={tableCellClassname}>
-                    <span
-                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                      "border border-sky-500/30 bg-sky-50 text-sky-700"
-                      }`}
-                    >
-                      { item.address_coordinates? `${item.address_coordinates.lat} , ${item.address_coordinates.lng}`  :" "}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    <td className={tableCellClassname}>
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                        "border border-sky-500/30 bg-sky-50 text-sky-700"
+                        }`}
+                      >
+                        { item.address_coordinates? `${item.address_coordinates.lat} , ${item.address_coordinates.lng}`  :" "}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       
     </>
