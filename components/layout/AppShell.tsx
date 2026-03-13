@@ -77,7 +77,7 @@ export function AppShell({ children }: AppShellProps) {
   }
 
   return (
-    <div className="flex min-h-screen bg-white text-black">
+    <div className="flex min-h-screen overflow-x-hidden bg-white text-black">
       {/* Mobile header */}
       <div className="fixed inset-x-0 top-0 z-40 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6 md:hidden">
         <span className="text-sm font-semibold tracking-tight">AgentOS</span>
@@ -187,8 +187,8 @@ export function AppShell({ children }: AppShellProps) {
         </div>
       </aside>
 
-      <main className="flex min-h-screen flex-1 flex-col bg-white md:ml-0">
-        <div className="flex-1 px-6 pb-8 pt-20 md:pt-6 lg:px-10 lg:pt-8">
+      <main className="flex min-h-screen min-w-0 flex-1 flex-col overflow-x-hidden bg-white md:ml-0">
+        <div className="min-w-0 flex-1 px-6 pb-8 pt-20 md:pt-6 lg:px-10 lg:pt-8">
           {children(user)}
         </div>
       </main>
