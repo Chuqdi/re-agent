@@ -11,7 +11,7 @@ import { signInWithGoogle } from '@/lib/firebase/auth';
 
 interface SchedulingProps {
   user: any;
-}
+} 
 
 export default function Scheduling({ user }: SchedulingProps) {
   const [showings, setShowings] = useState<Showing[]>([]);
