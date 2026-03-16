@@ -24,7 +24,7 @@ export default function Scheduling({ user }: SchedulingProps) {
 
   useEffect(() => {
     loadShowings();
-  }, [user.uid]);
+  }, [user.uid]); 
 
   const loadShowings = async () => {
     try {
