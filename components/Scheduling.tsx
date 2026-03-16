@@ -147,7 +147,7 @@ export default function Scheduling({ user }: SchedulingProps) {
               className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
             >
               {googleLinked ? 'Google Connected' : googleLoading ? 'Connecting...' : 'Connect Google'}
-            </button>
+            </button> 
             <button 
               onClick={handleSyncCalendar}
               disabled={syncing}
