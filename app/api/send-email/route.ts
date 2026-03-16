@@ -31,11 +31,17 @@ export async function POST(req: Request) {
     return Response.json({ success: true, message: "Email sent!" });
 
   } catch (error) {
-    console.error("MAILGUN ERROR:", error?.response?.data || error);
+    if (axios.isAxiosError(error)) {
+      console.error("MAILGUN ERROR:", error.response?.data || error.message);
+    } else {
+      console.error("UNKNOWN ERROR:", error);
+    }
 
-    return Response.json({
-      success: false,
-      message: "Failed to send email",
-    });
+    return Response.json(
+      { success: false, error: "Email failed to send" },
+      { status: 500 }
+    );
   }
 }
+
+
