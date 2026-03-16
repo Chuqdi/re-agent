@@ -48,6 +48,7 @@ export interface Listing {
 
 export interface Showing {
   id: string;
+  showingID: string;
   agentId: string;
   address: string;
   listingId?: string;
