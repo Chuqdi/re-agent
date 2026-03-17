@@ -77,7 +77,7 @@ export default function LocationPage() {
 
 
 
- const [selectedRequest, setSelectedRequest] = useState<IRequest | undefined>();
+ const [selectedRequest, setSelectedRequest] = useState<any|undefined>(); //could be IRequest or showing
 
 
  useEffect(() => {
@@ -92,7 +92,7 @@ export default function LocationPage() {
   if (!allShowings || !selectedRequestID) return;
  
    const found = allShowings.find((r) => r?.showingID === selectedRequestID);
-   setSelectedRequest(found);
+     setSelectedRequest(found);
  }, [allShowings, selectedRequestID]);
  
 
