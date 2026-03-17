@@ -75,14 +75,14 @@ function MyLocationContent() {
 
 
 //i have to update state of selectedUser and searching firebase, so I can filter out users who have been invited
-  const [selectedRequests, setSelectedRequests] = useState<IRequest | null>(null);
+  const [selectedRequests, setSelectedRequests] = useState<any | null>(null);
 
 useEffect(() => {
   const data = search.get("data");
 
   if (!data) return;
 
-  const parsed = JSON.parse(data) as IRequest;
+  const parsed = JSON.parse(data) as any; //used to be as IRequest
 
   setSelectedRequests(parsed);
 
