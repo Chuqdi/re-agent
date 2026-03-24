@@ -3,15 +3,20 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { getAllRequests } from "@/lib/firebase/firestore";
 import { IRequest } from "@/types";
-import { Plus, Search, Folder, FileText } from "lucide-react";
+import { Plus, Search, Folder, FileText,Edit } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+
 
 const tableCellClassname =
   "border-b border-gray-200 px-3 py-2 group-last:border-b-0 sm:px-4 sm:py-2.5";
 
 export default function RequestsPage() {
   const [requests, setRequests] = useState<IRequest[]>();
+  const router = useRouter();
+
   useEffect(() => {
     getAllRequests().then((r) => {
       console.log(r)
@@ -104,17 +109,24 @@ export default function RequestsPage() {
                     </td>
 
                     <td className={tableCellClassname}>
+                    <div className="flex items-center gap-2">
                       <span
                         className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
                           item.status === "Active"
                             ? "border border-emerald-500/30 bg-emerald-50 text-emerald-700"
                             : item.status === "Closed"
-                              ? "border border-gray-300 bg-gray-100 text-gray-700"
-                              : "border border-sky-500/30 bg-sky-50 text-sky-700"
+                            ? "border border-gray-300 bg-gray-100 text-gray-700"
+                            : "border border-sky-500/30 bg-sky-50 text-sky-700"
                         }`}
                       >
                         {item.status}
                       </span>
+                    
+                      <span className="inline-flex items-center justify-center border border-gray-300 text-gray-600 rounded-full">
+                       <Edit   onClick={() => router.push(`requests/edit-request/${item.id}`)} className="w-3 h-3" />
+                      </span>
+                    </div>
+
                     </td>
                   </tr>
                 ))}

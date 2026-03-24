@@ -115,7 +115,7 @@ function AddInvoiceItemSection({
             value={values.rate}
             onChange={handleChange("rate")}
             errorMessage={touched?.rate ? errors.rate : ""}
-            placeholder="eg. 30"
+            placeholder="eg. 30 per day"
           />
         </div>
       </div>
@@ -139,7 +139,7 @@ function AddInvoiceItemSection({
             type="number"
             onChange={handleChange("amount")}
             errorMessage={touched.amount ? errors.amount : ""}
-            placeholder="eg. 30"
+            placeholder="eg. 30,000"
           />
         </div>
       </div>

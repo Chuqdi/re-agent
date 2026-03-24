@@ -1,7 +1,9 @@
 "use client";
 
 import { AppShell } from "@/components/layout/AppShell";
-import { ArrowUpRight, FileText, Users, CalendarDays } from "lucide-react";
+import { ArrowUpRight, FileText, Users, CalendarDays,GitPullRequest } from "lucide-react";
+
+
 
 const showingsSummary = {
   today: 3,
@@ -87,12 +89,14 @@ export default function DashboardPage() {
                 High-level overview of your showings, clients, and deal flow.
               </p>
             </div>
-            <div className="hidden items-center gap-3 text-xs text-gray-500 sm:flex">
+            {/*
+              <div className="hidden items-center gap-3 text-xs text-gray-500 sm:flex">
               <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-50 px-3 py-1 text-[11px] text-emerald-700">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 Live location tracking enabled
               </span>
             </div>
+            */}
           </header>
 
           <section className="grid gap-4 md:grid-cols-2 lg:grid-rows-2">
@@ -155,11 +159,11 @@ export default function DashboardPage() {
                     <span className="text-xs text-gray-500">active</span>
                   </div>
                   <p className="mt-1 text-[11px] text-gray-500">
-                    {clientsSummary.hot} in hot pipeline
+                    {/*{clientsSummary.hot} in hot pipeline*/}
                   </p>
                 </div>
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-gray-100">
-                  <Users className="h-4 w-4 text-gray-700" />
+                  <GitPullRequest className="h-4 w-4 text-gray-700" />
                 </div>
               </div>
               <div className="flex-1 space-y-2 text-xs mt-4">

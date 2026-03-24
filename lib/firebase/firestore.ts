@@ -426,6 +426,34 @@ export const createNewRequest = async (
   }
 };
 
+
+
+
+
+export const updateCurrentRequest = async (
+  requestID: string,
+  propertyData: Omit<IRequest, "id" | "userId" | "createdAt" | "updatedAt">,
+  userId: string
+) => {
+  try {
+    const docRef = doc(db, COLLECTIONS.REQUESTS, requestID);
+
+    await updateDoc(docRef, {
+      ...propertyData,
+      userId,
+      updatedAt: new Date().toISOString(), // ✅ only update this
+    });
+
+    return requestID;
+  } catch (error) {
+    console.error("Error updating request:", error);
+    throw error;
+  }
+};
+
+
+
+
 export const getAllRequests: () => Promise<IRequest[]> = async () => {
   try {
     const q = query(
@@ -537,6 +565,16 @@ export const getShowingByID = async (showingID: string) => {
   return snapshot.data();
 };
 
+
+
+export const getRequestByID = async (requestID: string) => {
+  const ref = doc(db, COLLECTIONS.REQUESTS, requestID);
+  const snapshot = await getDoc(ref);
+
+  if (!snapshot.exists()) return null;
+
+  return snapshot.data();
+};
 
 
 export const updateShowingInvitees = async (

@@ -1,12 +1,13 @@
 "use client";
 import AppShell from "@/components/layout/AppShell";
-import { createNewRequest } from "@/lib/firebase/firestore";
+import { createNewRequest,updateCurrentRequest, getRequestByID } from "@/lib/firebase/firestore";
 import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
 import * as yup from "yup";
 import { getAddressGeoCoordinates } from "@/lib/utils/geolocation";
+
 
 const scheme = yup.object({
   property: yup.string().required("Required"),
@@ -19,11 +20,70 @@ const scheme = yup.object({
     .required("Required"),
   status: yup.string().required("Required"),
 });
-function AddnewRequest() {
+
+
+type PageProps = {
+  params: {
+    id: string;
+  };
+};
+
+
+function EditRequest({ params }: PageProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const auth = getAuth();
   const currentUser = auth.currentUser;
+
+
+const { id } = params;
+const [request, setRequest] = useState<any | null>(null);
+
+//useEffect(() => {
+//
+//
+//  const fetchRequest = async () => {
+//    const doc = await db.collection("requests").doc(id).get();
+//    if (doc.exists) {
+//      console.log(doc.data());
+//    }
+//  };
+//
+//  fetchRequest();
+//}, [id]);
+
+
+
+
+useEffect(() => {
+ 
+ // const parsed = JSON.parse(data) as any; //used to be as IRequest
+
+  //setSelectedRequests(parsed);
+
+  // fetch latest version from firestore
+  getRequestByID(id).then((returnedRequest) => {
+    if (returnedRequest) {
+      setRequest(returnedRequest);
+
+
+      setRequest({
+        ...returnedRequest,
+        property: returnedRequest.property || "",
+        city: returnedRequest.city || "",
+        state: returnedRequest.state || "",
+        type: returnedRequest.type || "Buy",
+        amount: returnedRequest.amount || 0,
+        status: returnedRequest.status || "Active",
+      });
+    }
+  });
+}, []);
+
+
+console.log("WHAT IS THE FETCHED REQUEST--->",request)
+
+
 
   const onSubmit = async (data: {
     property: string;
@@ -32,6 +92,7 @@ function AddnewRequest() {
     type: string;
     amount: number;
     status: string;
+   
   }) => {
     setIsLoading(true);
     const { state, city } = data;
@@ -46,17 +107,18 @@ function AddnewRequest() {
 
     try {
       const userId = currentUser?.uid;
-      if (userId) await createNewRequest({ ...data, coordinates }, userId!);
+      if (userId) await updateCurrentRequest(request.requestID,{ ...data, coordinates }, userId!);
       router.push("/dashboard/requests");
     } catch (error) {
-      alert("Error creating requests");
+      alert("Error updating requests");
     }
     setIsLoading(false);
   };
   const { values, handleSubmit, handleChange, errors, touched } = useFormik({
     validationSchema: scheme,
     onSubmit,
-    initialValues: {
+    enableReinitialize:true,
+    initialValues:request|| {
       property: "",
       city: "",
       state: "",
@@ -74,10 +136,10 @@ function AddnewRequest() {
             <div className="space-y-8">
               <div>
                 <h1 className="text-lg font-semibold tracking-tight text-black">
-                  Add New Request
+                  Edit Request
                 </h1>
                 <p className="mt-1 text-xs text-gray-500">
-                  Specify request details to add
+                  Specify request details to edit
                 </p>
               </div>
               <div className="space-y-4">
@@ -201,7 +263,7 @@ function AddnewRequest() {
                 className="w-full bg-black hover:bg-[#000000ef] text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isLoading}
               >
-                {isLoading ? "Loading..." : "Add Request"}
+                {isLoading ? "Loading..." : "Update Request"}
               </button>
             </div>
           </form>
@@ -211,4 +273,4 @@ function AddnewRequest() {
   );
 }
 
-export default AddnewRequest;
+export default EditRequest;

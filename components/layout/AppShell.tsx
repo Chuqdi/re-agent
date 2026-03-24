@@ -27,7 +27,7 @@ type AppShellProps = {
 
 const navItems = [
   { href: "/dashboard", label: "Home", icon: Home },
-  { href: "/dashboard/vault", label: "Vault", icon: FolderKanban },
+  /*{ href: "/dashboard/vault", label: "Vault", icon: FolderKanban },*/
   { href: "/dashboard/showings", label: "Showings", icon: CalendarDays },
   { href: "/dashboard/location", label: "Location", icon: MapPin },
   { href: "/dashboard/requests", label: "Requests", icon: GitPullRequest },
