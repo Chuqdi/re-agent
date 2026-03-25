@@ -3,19 +3,14 @@ import AppShell from "@/components/layout/AppShell";
 import AddInvoiceItemSection from "@/components/sections/AddInvoiceItemSection";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import SelectOption from "@/components/ui/SelectOption";
-import {
-  createNewInvoice,
-  createNewShowing,
-  getAllContacts,
-} from "@/lib/firebase/firestore";
-import { IContact, IInvoiceItem } from "@/types";
+import { getInvoiceWithID, updateInvoice } from "@/lib/firebase/firestore";
+import { IInvoice, IInvoiceItem } from "@/types";
 import { useFormik } from "formik";
 import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import * as yup from "yup";
-import SingleInvoiceItem from "../components/SingleInvoiceItem";
+import SingleInvoiceItem from "../../components/SingleInvoiceItem";
 
 const scheme = yup.object({
   companyName: yup.string().required("Required"),
@@ -23,9 +18,11 @@ const scheme = yup.object({
   phoneNumber: yup.string().required("Required"),
 });
 
-function AddNewInvoice() {
+function EditInvoicePage({ params }: { params: { id: string } }) {
   const router = useRouter();
+  const invoiceID = params?.id;
   const [isLoading, setIsLoading] = useState(false);
+  const [invoice, setInvoice] = useState<IInvoice | undefined>();
   const [invoiceItems, setInvoiceItems] = useState<IInvoiceItem[]>([]);
   const [activeInvoiceItem, setActiveInvoiceItem] = useState<IInvoiceItem>();
   const onSubmit = async (data: {
@@ -39,7 +36,7 @@ function AddNewInvoice() {
     }
     setIsLoading(true);
     try {
-      createNewInvoice({
+      updateInvoice(invoiceID, {
         ...data,
         items: invoiceItems,
       });
@@ -49,15 +46,30 @@ function AddNewInvoice() {
     }
     setIsLoading(false);
   };
-  const { values, handleSubmit, handleChange, errors, touched } = useFormik({
-    validationSchema: scheme,
-    onSubmit,
-    initialValues: {
-      companyName: "",
-      address: "",
-      phoneNumber: "",
-    },
-  });
+  const { values, handleSubmit, handleChange, errors, setFieldValue, touched } =
+    useFormik({
+      validationSchema: scheme,
+      onSubmit,
+      initialValues: {
+        companyName: "",
+        address: "",
+        phoneNumber: "",
+      },
+    });
+
+  const getInvoice = useCallback(async () => {
+    const returnedInvoice = await getInvoiceWithID(invoiceID!);
+    if (returnedInvoice) {
+      setFieldValue("companyName", returnedInvoice.companyName);
+      setFieldValue("address", returnedInvoice.address);
+      setFieldValue("phoneNumber", returnedInvoice.phoneNumber);
+      setInvoice(returnedInvoice);
+      setInvoiceItems(returnedInvoice?.items);
+    }
+  }, [invoiceID]);
+  useEffect(() => {
+    getInvoice();
+  }, []);
 
   return (
     <AppShell>
@@ -66,7 +78,7 @@ function AddNewInvoice() {
           <div className="space-y-8">
             <div>
               <h1 className="text-lg font-semibold tracking-tight text-black">
-                Add New Invoice
+                Edit Invoice
               </h1>
               <p className="mt-1 text-xs text-gray-500">
                 Specify invoice details to add
@@ -79,7 +91,7 @@ function AddNewInvoice() {
                     label="Company Name"
                     value={values.companyName}
                     onChange={handleChange("companyName")}
-                    errorMessage={errors.companyName}
+                    errorMessage={touched.companyName ? errors.companyName : ""}
                     required
                     placeholder="eg. 3 Bedroom Terrace. Ikoyi"
                   />
@@ -90,7 +102,7 @@ function AddNewInvoice() {
                     label="Address"
                     value={values.address}
                     onChange={handleChange("address")}
-                    errorMessage={errors.address}
+                    errorMessage={touched.address ? errors.address : ""}
                     placeholder="eg. 30"
                   />
                 </div>
@@ -102,7 +114,7 @@ function AddNewInvoice() {
                     label="Phone number"
                     value={values.phoneNumber}
                     onChange={handleChange("phoneNumber")}
-                    errorMessage={errors.phoneNumber}
+                    errorMessage={touched.phoneNumber ? errors.phoneNumber : ""}
                     required
                   />
                 </div>
@@ -113,12 +125,11 @@ function AddNewInvoice() {
               </h1>
 
               <div className="flex flex-col gap-4">
-                {invoiceItems.map((invoiceItem, index) => (
+                {invoiceItems?.map((invoiceItem, index) => (
                   <SingleInvoiceItem
                     key={`single_invoice_item_${invoiceItem.id}_${index}`}
                     onDeleteInvoice={() => {
-                      setInvoiceItems((items) =>
-                        items?.filter((i) => i?.id !== invoiceItem.id),
+                      setInvoiceItems((items) => items?.filter((i) => i?.id !== invoiceItem.id)
                       );
                     }}
                     invoiceItem={invoiceItem}
@@ -143,7 +154,7 @@ function AddNewInvoice() {
               <Button
                 isLoading={isLoading}
                 onClick={() => handleSubmit()}
-                title="Add Invoice"
+                title="Edit Invoice"
                 type="submit"
               />
             </div>
@@ -154,4 +165,4 @@ function AddNewInvoice() {
   );
 }
 
-export default AddNewInvoice;
+export default EditInvoicePage;

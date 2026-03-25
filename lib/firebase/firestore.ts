@@ -464,6 +464,45 @@ export const createNewContact = async (
   }
 };
 
+export const updateContact = async (
+  id: string,
+  contactData: Partial<
+    Omit<IContact, "id" | "userId" | "createdAt" | "updatedAt">
+  >,
+) => {
+  try {
+    const ref = doc(db, COLLECTIONS.CONTACTS, id);
+
+    await updateDoc(ref, {
+      ...contactData,
+      updatedAt: Timestamp.now(),
+    });
+
+    return id;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getContactWithID = async (
+  id: string,
+): Promise<IContact | null> => {
+  try {
+    const ref = doc(db, COLLECTIONS.CONTACTS, id);
+    const snapshot = await getDoc(ref);
+
+    if (!snapshot.exists()) return null;
+
+    return {
+      id: snapshot.id,
+      ...(snapshot.data() as Omit<IContact, "id">),
+    };
+  } catch (error) {
+    console.error("Error fetching contact:", error);
+    throw error;
+  }
+};
+
 export const getAllContacts: () => Promise<IContact[]> = async () => {
   try {
     const q = query(collection(db, COLLECTIONS.CONTACTS), orderBy("createdAt"));
@@ -531,12 +570,54 @@ export const getAllInvoices: () => Promise<IInvoice[]> = async () => {
 
     const querySnapshot = await getDocs(q);
     const invoices = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
       ...doc.data(),
     })) as IInvoice[];
 
     return invoices;
   } catch (error) {
     console.error("Error fetching invoices:", error);
+    throw error;
+  }
+};
+
+export const getInvoiceWithID = async (
+  id: string,
+): Promise<IInvoice | null> => {
+  try {
+    const ref = doc(db, COLLECTIONS.INVOICES, id);
+    const snapshot = await getDoc(ref);
+
+    if (!snapshot.exists()) return null;
+
+    return {
+      id: snapshot.id,
+      ...(snapshot.data() as Omit<IInvoice, "id">),
+    };
+  } catch (error) {
+    console.error("Error fetching Invoice:", error);
+    throw error;
+  }
+};
+
+
+
+export const updateInvoice = async (
+  id: string,
+  contactData: Partial<
+    Omit<IInvoice, "id" | "userId" | "createdAt" | "updatedAt">
+  >,
+) => {
+  try {
+    const ref = doc(db, COLLECTIONS.INVOICES, id);
+
+    await updateDoc(ref, {
+      ...contactData,
+      updatedAt: Timestamp.now(),
+    });
+
+    return id;
+  } catch (error) {
     throw error;
   }
 };

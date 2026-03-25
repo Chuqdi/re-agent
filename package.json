@@ -14,6 +14,7 @@
     "firebase": "^10.12.0",
     "firebase-admin": "^13.6.0",
     "formik": "^2.4.9",
+    "framer-motion": "^12.38.0",
     "googleapis": "^129.0.0",
     "libphonenumber-js": "^1.12.37",
     "lucide-react": "^0.344.0",

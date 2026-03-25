@@ -138,6 +138,7 @@ export interface IInvoiceItem {
   amount: string;
 }
 export interface IInvoice {
+  id:string;
   createdAt:string;
   updatedAt:string;
   invoiceID:string;

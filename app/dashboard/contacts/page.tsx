@@ -92,10 +92,10 @@ export default function ContactsPage() {
                       {client.email}
                     </span>
                     <div className="flex justify-end">
-                      <button className="inline-flex items-center gap-1 rounded-full border border-gray-300 bg-black px-2 py-1 text-[11px] text-white hover:bg-black/90">
+                      <Link href={`/dashboard/contacts/edit-contact/${client.id}`} className="inline-flex items-center gap-1 rounded-full border border-gray-300 bg-black px-2 py-1 text-[11px] text-white hover:bg-black/90">
                         View
                         <ArrowRight className="h-3 w-3" />
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </div>

@@ -32,9 +32,9 @@ function AddNewContact() {
     try {
       const userId = currentUser?.uid;
       if (userId) await createNewContact(data, userId!);
-      router.push("/contacts");
+      router.push("/dashboard/contacts");
     } catch (error) {
-        alert("Error creating contact")
+      alert("Error creating contact");
     }
     setLoading(false);
   };
@@ -63,43 +63,47 @@ function AddNewContact() {
                   Specify showing details to add
                 </p>
               </div>
-              <Input
-                label="First Name"
-                value={values.firstName}
-                name="firstName"
-                errorMessage={errors.firstName}
-                onChange={handleChange("firstName")}
-                required
-                placeholder="Jane"
-              />
-              <Input
-                label="Last Name"
-                value={values.lastName}
-                name="lastName"
-                errorMessage={errors.lastName}
-                onChange={handleChange("lastName")}
-                required
-                placeholder="Doe"
-              />
-              <Input
-                label="Email"
-                value={values.email}
-                name="email"
-                errorMessage={errors.email}
-                onChange={handleChange("email")}
-                required
-                placeholder="eg. janedoe@gmail.com"
-              />
+              <div className="flex items-center gap-4">
+                <Input
+                  label="First Name"
+                  value={values.firstName}
+                  name="firstName"
+                  errorMessage={errors.firstName}
+                  onChange={handleChange("firstName")}
+                  required
+                  placeholder="Jane"
+                />
+                <Input
+                  label="Last Name"
+                  value={values.lastName}
+                  name="lastName"
+                  errorMessage={errors.lastName}
+                  onChange={handleChange("lastName")}
+                  required
+                  placeholder="Doe"
+                />
+              </div>
+              <div className="flex items-center gap-4">
+                <Input
+                  label="Email"
+                  value={values.email}
+                  name="email"
+                  errorMessage={errors.email}
+                  onChange={handleChange("email")}
+                  required
+                  placeholder="eg. janedoe@gmail.com"
+                />
 
-              <Input
-                label="Phone number"
-                value={values.phoneNumber}
-                name="phoneNumber"
-                errorMessage={errors.phoneNumber}
-                onChange={handleChange("phoneNumber")}
-                required
-                placeholder="eg. +234 8122 510 760"
-              />
+                <Input
+                  label="Phone number"
+                  value={values.phoneNumber}
+                  name="phoneNumber"
+                  errorMessage={errors.phoneNumber}
+                  onChange={handleChange("phoneNumber")}
+                  required
+                  placeholder="eg. +234 8122 510 760"
+                />
+              </div>
 
               <Button isLoading={loading} title="Submit" />
             </div>
