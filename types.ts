@@ -122,7 +122,6 @@ export interface IContact {
   userId: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
-
   firstName: string;
   lastName: string;
   email: string;
@@ -141,6 +140,7 @@ export interface IInvoice {
   id:string;
   createdAt:string;
   updatedAt:string;
+  userId: string;
   invoiceID:string;
   companyName: string;
   address: string;

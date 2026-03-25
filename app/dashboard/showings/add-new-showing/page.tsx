@@ -5,6 +5,7 @@ import Input from "@/components/ui/Input";
 import SelectOption from "@/components/ui/SelectOption";
 import { createNewShowing, getAllContacts } from "@/lib/firebase/firestore";
 import { IContact } from "@/types";
+import { getAuth } from "firebase/auth";
 import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -21,6 +22,7 @@ const scheme = yup.object({
 function AddNewShowing() {
   const router = useRouter();
   const [contacts, setContacts] = useState<IContact[]>();
+  const auth = getAuth();
   const [isLoading, setIsLoading] = useState(false);
   const onSubmit = async (data: {
     address: string;
@@ -55,10 +57,13 @@ function AddNewShowing() {
   });
 
   useEffect(() => {
-    getAllContacts().then((r) => {
-      setContacts(r);
-    });
-  }, []);
+    const userId = auth.currentUser?.uid;
+    if (userId) {
+      getAllContacts(userId).then((r) => {
+        setContacts(r);
+      });
+    }
+  }, [auth]);
 
   return (
     <AppShell>

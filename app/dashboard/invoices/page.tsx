@@ -7,17 +7,23 @@ import { ArrowRight, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import moment from "moment";
+import { getAuth } from "firebase/auth";
 
 const tableCellClassname =
   "px-4 py-2.5 border-b border-gray-200 group-last:border-b-0";
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<IInvoice[]>([]);
+
+  const auth = getAuth();
   useEffect(() => {
-    getAllInvoices().then((r) => {
-      setInvoices(r);
-    });
-  }, []);
+    const userId = auth.currentUser?.uid;
+    if (userId) {
+      getAllInvoices(userId).then((r) => {
+        setInvoices(r);
+      });
+    }
+  }, [auth]);
   return (
     <AppShell>
       {() => (

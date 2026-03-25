@@ -31,7 +31,7 @@ function AddNewContact() {
     setLoading(true);
     try {
       const userId = currentUser?.uid;
-      if (userId) await createNewContact(data, userId!);
+      if (userId) await createNewContact(data, userId);
       router.push("/dashboard/contacts");
     } catch (error) {
       alert("Error creating contact");

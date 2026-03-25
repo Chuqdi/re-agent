@@ -21,15 +21,17 @@ function AddInvoiceItemSection({
   activeInvoiceItem,
   setItems,
   setActiveInvoiceItem,
+  isShowingAddItemsInputs,
+  setIsShowingAddItemsInputs,
 }: {
   activeInvoiceItem?: IInvoiceItem;
   setItems: React.Dispatch<React.SetStateAction<IInvoiceItem[]>>;
+  setIsShowingAddItemsInputs: React.Dispatch<React.SetStateAction<boolean>>;
+  isShowingAddItemsInputs: boolean;
   setActiveInvoiceItem: React.Dispatch<
     React.SetStateAction<IInvoiceItem | undefined>
   >;
 }) {
-  const [isShowingAddItemsInputs, setIsShowingAddItemsInputs] = useState(false);
-
   const onSubmit = (
     data: {
       description: string;
@@ -67,9 +69,7 @@ function AddInvoiceItemSection({
     setActiveInvoiceItem(undefined);
     action.resetForm();
     setIsShowingAddItemsInputs(false);
-    setTimeout(() => {
-      setIsShowingAddItemsInputs(true);
-    }, 40);
+   
   };
 
   const {
@@ -105,7 +105,7 @@ function AddInvoiceItemSection({
 
   return (
     <form
-      className="space-y-7"
+      className=" space-y-7"
       onSubmit={(e) => {
         e.preventDefault();
         isShowingAddItemsInputs
@@ -182,15 +182,12 @@ function AddInvoiceItemSection({
       <div className="flex w-full justify-center items-end">
         <Button
           variant="secondary"
-          title={activeInvoiceItem?.id ? "Edit" : "Add"}
-          className="w-full md:w-[10%]"
+          title={isShowingAddItemsInputs ? "Submit" : "Add Invoice Item"}
+          className="w-full "
           type="button"
           rightIcon={
-            activeInvoiceItem?.id ? (
-              <Pencil size={18} color="#000" />
-            ) : (
-              <Plus color="#000" size={20} />
-            )
+          
+            <Plus color="#000" size={20} />
           }
         />
       </div>

@@ -503,9 +503,12 @@ export const getContactWithID = async (
   }
 };
 
-export const getAllContacts: () => Promise<IContact[]> = async () => {
+export const getAllContacts: (userId:string) => Promise<IContact[]> = async (userId:string) => {
   try {
-    const q = query(collection(db, COLLECTIONS.CONTACTS), orderBy("createdAt"));
+    const q = query(
+      collection(db, COLLECTIONS.CONTACTS),
+      where("userId", "==", userId)
+    );
 
     const querySnapshot = await getDocs(q);
     const contacts = querySnapshot.docs.map((doc) => ({
@@ -545,13 +548,18 @@ export const createNewShowing = async (
 //INVOICES
 
 export const createNewInvoice = async (
-  propertyData: Omit<IInvoice, "id" | "invoiceID" | "createdAt" | "updatedAt">,
+  userId: string,
+  propertyData: Omit<
+    IInvoice,
+    "id" | "userId" | "invoiceID" | "createdAt" | "updatedAt"
+  >,
 ) => {
   try {
     const docRef = doc(collection(db, COLLECTIONS.INVOICES));
 
     await setDoc(docRef, {
       ...propertyData,
+      userId,
       invoiceID: docRef.id,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -564,9 +572,15 @@ export const createNewInvoice = async (
   }
 };
 
-export const getAllInvoices: () => Promise<IInvoice[]> = async () => {
+export const getAllInvoices: (userId: string) => Promise<IInvoice[]> = async (
+  userId: string,
+) => {
   try {
-    const q = query(collection(db, COLLECTIONS.INVOICES), orderBy("createdAt"));
+    const q = query(
+      collection(db, COLLECTIONS.INVOICES),
+      where("userId", "==", userId)
+      // orderBy("createdAt"),
+    );
 
     const querySnapshot = await getDocs(q);
     const invoices = querySnapshot.docs.map((doc) => ({
@@ -599,8 +613,6 @@ export const getInvoiceWithID = async (
     throw error;
   }
 };
-
-
 
 export const updateInvoice = async (
   id: string,

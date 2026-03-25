@@ -1,46 +1,26 @@
 "use client";
 
 import { AppShell } from "@/components/layout/AppShell";
-import { getAllContacts, getAllRequests } from "@/lib/firebase/firestore";
+import { getAllContacts } from "@/lib/firebase/firestore";
 import { IContact } from "@/types";
+import { getAuth } from "firebase/auth";
 import { ArrowRight, Plus } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-type ClientRow = {
-  id: string;
-  name: string;
-  phone: string;
-  email: string;
-};
 
-const demoClients: ClientRow[] = [
-  {
-    id: "1",
-    name: "Emeka Adaku",
-    phone: "+2349035568126",
-    email: "emeka.adaku@example.com",
-  },
-  {
-    id: "2",
-    name: "Timi Egbuson",
-    phone: "+2348063779239",
-    email: "timiegbuson@acmerelocation.com",
-  },
-  {
-    id: "3",
-    name: "Ikem Anyaoku",
-    phone: "+2348183763331",
-    email: "ikem.anyaoku@example.com",
-  },
-];
+
 
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<IContact[]>();
+  const auth = getAuth();
   useEffect(() => {
-    getAllContacts().then((r) => {
-      setContacts(r);
-    });
+    const userId = auth.currentUser?.uid;
+    if (userId) {
+      getAllContacts(userId).then((r) => {
+        setContacts(r);
+      });
+    }
   }, []);
 
   return (
@@ -92,7 +72,10 @@ export default function ContactsPage() {
                       {client.email}
                     </span>
                     <div className="flex justify-end">
-                      <Link href={`/dashboard/contacts/edit-contact/${client.id}`} className="inline-flex items-center gap-1 rounded-full border border-gray-300 bg-black px-2 py-1 text-[11px] text-white hover:bg-black/90">
+                      <Link
+                        href={`/dashboard/contacts/edit-contact/${client.id}`}
+                        className="inline-flex items-center gap-1 rounded-full border border-gray-300 bg-black px-2 py-1 text-[11px] text-white hover:bg-black/90"
+                      >
                         View
                         <ArrowRight className="h-3 w-3" />
                       </Link>
