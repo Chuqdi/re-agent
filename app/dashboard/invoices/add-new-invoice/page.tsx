@@ -82,7 +82,7 @@ function AddNewInvoice() {
                     onChange={handleChange("companyName")}
                     errorMessage={errors.companyName}
                     required
-                    placeholder="eg. 3 Bedroom Terrace. Ikoyi"
+                    placeholder="e.g Sample Company Plc"
                   />
                 </div>
 
@@ -92,7 +92,7 @@ function AddNewInvoice() {
                     value={values.address}
                     onChange={handleChange("address")}
                     errorMessage={errors.address}
-                    placeholder="eg. 30"
+                    placeholder="eg. 30 Odunjo Way, Surulere, Lagos"
                   />
                 </div>
               </div>

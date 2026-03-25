@@ -1,7 +1,7 @@
 "use client";
 
 import { AppShell } from "@/components/layout/AppShell";
-import { getAllRequests, getShowings } from "@/lib/firebase/firestore";
+import { getAllRequests, getShowings,updateShowingInvitees } from "@/lib/firebase/firestore";
 import { IRequest, Showing } from "@/types";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -57,6 +57,7 @@ export default function LocationPage() {
   const { location, error: locationError } = useGeoLocation();
   const [requests, setRequests] = useState<IRequest[]>();
   const [selectedRequestID, setSelectedRequestID] = useState<string>();
+
   const [filter, setFilter] = useState<string>("all");
   const [inviteEmail, setInviteEmail] = useState("");
   const [allShowings, setAllShowings] = useState<Showing[]>([]);
@@ -66,11 +67,35 @@ export default function LocationPage() {
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "",
   });
 
+
+   //OLD APPLICATION STYLE
   // ✅ Synchronous derivation — no useEffect or useState needed
-  const selectedRequest = useMemo(
-    () => requests?.find((r) => r?.id === selectedRequestID),
-    [requests, selectedRequestID],
-  );
+ // const selectedRequest = useMemo(
+ //   () => requests?.find((r) => r?.id === selectedRequestID),
+ //   [requests, selectedRequestID],
+ // );
+
+
+
+ const [selectedRequest, setSelectedRequest] = useState<any|undefined>(); //could be IRequest or showing
+
+
+ useEffect(() => {
+  getAllRequests().then((r) => {
+    setRequests(r);
+  });
+}, []);
+
+
+
+ useEffect(() => {
+  if (!allShowings || !selectedRequestID) return;
+ 
+   const found = allShowings.find((r) => r?.showingID === selectedRequestID);
+     setSelectedRequest(found);
+ }, [allShowings, selectedRequestID]);
+ 
+
 
   useEffect(() => {
     const loadShowings = async () => {
@@ -84,26 +109,126 @@ export default function LocationPage() {
     loadShowings();
   }, []);
 
-  useEffect(() => {
-    getAllRequests().then((r) => {
-      setRequests(r);
-    });
-  }, []);
 
-  const handleInvite = () => {
+
+  const emailHTML = `
+      <p> <strong>Hello, </strong>,</p>
+    
+      <p>You have been invited to view the property:
+      
+      ${selectedRequest && selectedRequest.property}
+      </p>
+    
+     
+
+      <p >
+        <a 
+          href="https://re-agents-iota.vercel.app/dashboard/mylocation?data=${encodeURIComponent(JSON.stringify(selectedRequest))}" 
+          target="_blank"
+          style="color:black; text-decoration:none;"
+        >
+          Please Click Here to view
+        </a>
+    </p>
+
+
+     
+      <br/><br/>
+      <p>Warm Regards,</p>
+      <p>– John</p>
+
+
+
+
+    <br/><br/>
+    
+    <p style="text-align:center; font-size:12px; color:#888; margin:20px 0;">
+        <a 
+          href="https://re-agents-iota.vercel.app/dashboard" 
+          target="_blank"
+          style="color:#888; text-decoration:none;"
+        >
+          Powered by RE-agents
+        </a>
+    </p>
+    
+    `;
+    
+
+  //const handleInvite = () => {
+  //  if (!selectedRequest) {
+  //    window.alert("Please select a showing first!");
+  //    return;
+  //  }
+  //  if (selectedRequest?.coordinates) {
+  //    const url = `/dashboard/mylocation?data=${encodeURIComponent(
+  //      JSON.stringify(selectedRequest),
+  //    )}`;
+//
+  //    window.open(url, "_blank");
+  //  }
+  //  setInviteEmail("");
+//
+//
+  //  
+  //};
+
+
+  const handleInvite = async () => {
     if (!selectedRequest) {
       window.alert("Please select a showing first!");
       return;
     }
-    if (selectedRequest?.coordinates) {
-      const url = `/dashboard/mylocation?data=${encodeURIComponent(
-        JSON.stringify(selectedRequest),
-      )}`;
+  
+   
+  
+    
+  
+    try {
 
-      window.open(url, "_blank");
+
+   // updateShowingInvitees()
+
+    await updateShowingInvitees(selectedRequest && selectedRequest.showingID, inviteEmail);
+
+        
+      const res = await fetch("/api/send-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          to: inviteEmail && inviteEmail,
+          subject: "Your Invitation to Our Showing",
+          htmlMessage: emailHTML,
+          name: "John Test",
+          userEmail:'info@reagents.com',
+        }),
+      });
+  
+      const result = await res.json();
+  
+      if (result.success) {
+        console.log("Email sent!");
+        setInviteEmail("");
+
+        if (selectedRequest?.coordinates) {
+          const url = `/dashboard/mylocation?data=${encodeURIComponent(
+            JSON.stringify(selectedRequest)
+          )}`;
+      
+          window.open(url, "_blank");
+        }
+
+      } else {
+        console.error("Email failed");
+      }
+  
+    } catch (error) {
+      console.error("Error sending email:", error);
     }
-    setInviteEmail("");
   };
+
 
   const filteredAgents = useMemo(
     () =>
@@ -164,18 +289,23 @@ export default function LocationPage() {
 
           {/* Filters */}
           <div className="mb-3 flex items-center justify-between gap-3 text-xs text-gray-600">
-            {!!requests?.length && (
+            {!!allShowings?.length && (
               <div className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-2 py-1">
                 <span className="text-[11px] text-gray-500">Showing</span>
                 <select
                   value={selectedRequestID}
-                  onChange={(e) => setSelectedRequestID(e.target.value)}
+                  onChange={(e) => {
+
+                    console.log("WHAT IS E.TARGET.VALUE--->",e.target.value)
+                    setSelectedRequestID(e.target.value && e.target.value); /*setSelectedRequest(e.target.value)*/
+                  
+                  } }
                   className="bg-white text-xs text-black focus:outline-none"
                 >
                   <option value="">— select —</option>
-                  {requests?.map((request) => (
-                    <option key={request?.id} value={request?.id}>
-                      {request?.property}
+                  {allShowings?.map((showing) => (
+                    <option key={showing?.showingID} value={showing?.showingID}>
+                      {showing?.address}
                     </option>
                   ))}
                 </select>

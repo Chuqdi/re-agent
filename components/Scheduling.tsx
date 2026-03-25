@@ -11,7 +11,7 @@ import { signInWithGoogle } from '@/lib/firebase/auth';
 
 interface SchedulingProps {
   user: any;
-}
+} 
 
 export default function Scheduling({ user }: SchedulingProps) {
   const [showings, setShowings] = useState<Showing[]>([]);
@@ -24,7 +24,7 @@ export default function Scheduling({ user }: SchedulingProps) {
 
   useEffect(() => {
     loadShowings();
-  }, [user.uid]);
+  }, [user.uid]); 
 
   const loadShowings = async () => {
     try {
@@ -147,8 +147,8 @@ export default function Scheduling({ user }: SchedulingProps) {
               className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50"
             >
               {googleLinked ? 'Google Connected' : googleLoading ? 'Connecting...' : 'Connect Google'}
-            </button>
-            <button
+            </button> 
+            <button 
               onClick={handleSyncCalendar}
               disabled={syncing}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"

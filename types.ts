@@ -48,6 +48,7 @@ export interface Listing {
 
 export interface Showing {
   id: string;
+  showingID: string;
   agentId: string;
   address: string;
   listingId?: string;
@@ -101,6 +102,21 @@ export interface IRequest {
   amount: number;
   status: string;
   userId: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+
+export interface IUser {
+  uid: string;
+  property: string;
+  email: string;
+  address_coordinates: { lat: number; lng: number };
+ 
+  fullName: string;
+  displayName: string;
+  
+  location_updated_at: Timestamp;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

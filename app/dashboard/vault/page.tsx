@@ -115,7 +115,7 @@ export default function VaultPage() {
                             : 'border border-sky-500/30 bg-sky-50 text-sky-700'
                         }`}
                       >
-                        {item.status}
+                        {item.status} 
                       </span>
                     </div>
                   </div>

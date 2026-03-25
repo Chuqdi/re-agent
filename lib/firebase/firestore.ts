@@ -11,6 +11,7 @@ import {
   orderBy,
   Timestamp,
   addDoc,
+  arrayUnion,
   QueryConstraint,
 } from "firebase/firestore";
 import { db } from "./config";
@@ -24,6 +25,7 @@ import {
   IContact,
   IShowing,
   IInvoice,
+  IUser,
 } from "../../types";
 import { COLLECTIONS } from ".";
 
@@ -424,6 +426,34 @@ export const createNewRequest = async (
   }
 };
 
+
+
+
+
+export const updateCurrentRequest = async (
+  requestID: string,
+  propertyData: Omit<IRequest, "id" | "userId" | "createdAt" | "updatedAt">,
+  userId: string
+) => {
+  try {
+    const docRef = doc(db, COLLECTIONS.REQUESTS, requestID);
+
+    await updateDoc(docRef, {
+      ...propertyData,
+      userId,
+      updatedAt: new Date().toISOString(), // ✅ only update this
+    });
+
+    return requestID;
+  } catch (error) {
+    console.error("Error updating request:", error);
+    throw error;
+  }
+};
+
+
+
+
 export const getAllRequests: () => Promise<IRequest[]> = async () => {
   try {
     const q = query(
@@ -436,6 +466,27 @@ export const getAllRequests: () => Promise<IRequest[]> = async () => {
       id: doc.id,
       ...doc.data(),
     })) as IRequest[];
+
+    return requests;
+  } catch (error) {
+    console.error("Error fetching requests:", error);
+    throw error;
+  }
+};
+
+
+export const getAllUsers: () => Promise<IUser[]> = async () => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.USERS),
+      orderBy("createdAt", "desc"),
+    );
+
+    const querySnapshot = await getDocs(q);
+    const requests = querySnapshot.docs.map((doc) => ({
+      uid: doc.id,
+      ...doc.data(),
+    })) as IUser[];
 
     return requests;
   } catch (error) {
@@ -541,6 +592,48 @@ export const createNewShowing = async (
     return docRef.id;
   } catch (error) {
     console.error("Error creating showing:", error);
+    throw error;
+  }
+};
+
+
+
+export const getShowingByID = async (showingID: string) => {
+  const ref = doc(db, COLLECTIONS.SHOWINGS, showingID);
+  const snapshot = await getDoc(ref);
+
+  if (!snapshot.exists()) return null;
+
+  return snapshot.data();
+};
+
+
+
+export const getRequestByID = async (requestID: string) => {
+  const ref = doc(db, COLLECTIONS.REQUESTS, requestID);
+  const snapshot = await getDoc(ref);
+
+  if (!snapshot.exists()) return null;
+
+  return snapshot.data();
+};
+
+
+export const updateShowingInvitees = async (
+  showingID: string,
+  newEmail: string
+) => {
+  try {
+    const showingRef = doc(db, COLLECTIONS.SHOWINGS, showingID);
+
+    await updateDoc(showingRef, {
+      invitees: arrayUnion(newEmail),
+      updatedAt: new Date().toISOString(),
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Error updating showing invitees:", error);
     throw error;
   }
 };
