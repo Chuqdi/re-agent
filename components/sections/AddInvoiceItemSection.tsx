@@ -182,7 +182,7 @@ function AddInvoiceItemSection({
       <div className="flex w-full justify-center items-end">
         <Button
           variant="secondary"
-          title={isShowingAddItemsInputs ? "Submit" : "Add Invoice Item"}
+          title={isShowingAddItemsInputs ? "Add Item" : "Add Invoice Item"}
           className="w-full "
           type="button"
           rightIcon={
