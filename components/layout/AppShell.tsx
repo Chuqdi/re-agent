@@ -6,6 +6,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 import LoginPage from "@/components/LoginPage";
+
+
+
 import {
   Home,
   FolderKanban,
@@ -42,6 +45,18 @@ export function AppShell({ children }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+
+
+  useEffect(() => {
+    try {
+       if(user){signOut();}
+      
+    } catch (error) {
+      console.error("Error signing out on login page:", error);
+    }
+  }, []);
+
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
