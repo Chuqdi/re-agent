@@ -47,24 +47,43 @@ export function AppShell({ children }: AppShellProps) {
   const router = useRouter();
 
 
+
+
+
+
+  //useEffect(() => {
+  //  const unsubscribe = onAuthStateChanged(auth, (u) => {
+  //    setUser(u);
+  //    setLoading(false);
+  //  });
+  //  return () => unsubscribe();
+  //}, []);
+
+
+
+
+
   useEffect(() => {
-    try {
-       if(user){signOut();}
-      
-    } catch (error) {
-      console.error("Error signing out on login page:", error);
-    }
-  }, []);
-
-
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
+    const unsubscribe = onAuthStateChanged(auth, async (u) => {
       setUser(u);
       setLoading(false);
+  
+      // 🚨 If no user → force login
+      if (!u && pathname !== "/login") {
+        router.push("/login");
+      }
+  
+      // 🚨 If user is logged in and tries to go to login page
+      if (u && pathname === "/login") {
+        router.push("/dashboard");
+      }
     });
+  
     return () => unsubscribe();
-  }, []);
+  }, [pathname, router]);
+
+
+
 
   const handleSignOut = async () => {
     try {

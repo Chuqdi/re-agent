@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signInWithEmail, signInWithGoogle } from '@/lib/firebase/auth';
+import { setPersistence, browserSessionPersistence, signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase/config";
 import PhoneAuth from './sections/PhoneAuth';
 
 export default function LoginPage() {
@@ -12,11 +14,19 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+
+useEffect(()=>{
+  //signOut(auth)
+   setPersistence(auth, browserSessionPersistence);
+},[])
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
     setError(null);
     try {
+
+      await setPersistence(auth, browserSessionPersistence);
       await signInWithEmail(email, password);
       router.push('/');
       router.refresh();
