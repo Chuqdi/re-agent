@@ -515,9 +515,51 @@ export const createNewContact = async (
   }
 };
 
-export const getAllContacts: () => Promise<IContact[]> = async () => {
+export const updateContact = async (
+  id: string,
+  contactData: Partial<
+    Omit<IContact, "id" | "userId" | "createdAt" | "updatedAt">
+  >,
+) => {
   try {
-    const q = query(collection(db, COLLECTIONS.CONTACTS), orderBy("createdAt"));
+    const ref = doc(db, COLLECTIONS.CONTACTS, id);
+
+    await updateDoc(ref, {
+      ...contactData,
+      updatedAt: Timestamp.now(),
+    });
+
+    return id;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getContactWithID = async (
+  id: string,
+): Promise<IContact | null> => {
+  try {
+    const ref = doc(db, COLLECTIONS.CONTACTS, id);
+    const snapshot = await getDoc(ref);
+
+    if (!snapshot.exists()) return null;
+
+    return {
+      id: snapshot.id,
+      ...(snapshot.data() as Omit<IContact, "id">),
+    };
+  } catch (error) {
+    console.error("Error fetching contact:", error);
+    throw error;
+  }
+};
+
+export const getAllContacts: (userId:string) => Promise<IContact[]> = async (userId:string) => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.CONTACTS),
+      where("userId", "==", userId)
+    );
 
     const querySnapshot = await getDocs(q);
     const contacts = querySnapshot.docs.map((doc) => ({
@@ -599,13 +641,18 @@ export const updateShowingInvitees = async (
 //INVOICES
 
 export const createNewInvoice = async (
-  propertyData: Omit<IInvoice, "id" | "invoiceID" | "createdAt" | "updatedAt">,
+  userId: string,
+  propertyData: Omit<
+    IInvoice,
+    "id" | "userId" | "invoiceID" | "createdAt" | "updatedAt"
+  >,
 ) => {
   try {
     const docRef = doc(collection(db, COLLECTIONS.INVOICES));
 
     await setDoc(docRef, {
       ...propertyData,
+      userId,
       invoiceID: docRef.id,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -618,18 +665,64 @@ export const createNewInvoice = async (
   }
 };
 
-export const getAllInvoices: () => Promise<IInvoice[]> = async () => {
+export const getAllInvoices: (userId: string) => Promise<IInvoice[]> = async (
+  userId: string,
+) => {
   try {
-    const q = query(collection(db, COLLECTIONS.INVOICES), orderBy("createdAt"));
+    const q = query(
+      collection(db, COLLECTIONS.INVOICES),
+      where("userId", "==", userId)
+      // orderBy("createdAt"),
+    );
 
     const querySnapshot = await getDocs(q);
     const invoices = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
       ...doc.data(),
     })) as IInvoice[];
 
     return invoices;
   } catch (error) {
     console.error("Error fetching invoices:", error);
+    throw error;
+  }
+};
+
+export const getInvoiceWithID = async (
+  id: string,
+): Promise<IInvoice | null> => {
+  try {
+    const ref = doc(db, COLLECTIONS.INVOICES, id);
+    const snapshot = await getDoc(ref);
+
+    if (!snapshot.exists()) return null;
+
+    return {
+      id: snapshot.id,
+      ...(snapshot.data() as Omit<IInvoice, "id">),
+    };
+  } catch (error) {
+    console.error("Error fetching Invoice:", error);
+    throw error;
+  }
+};
+
+export const updateInvoice = async (
+  id: string,
+  contactData: Partial<
+    Omit<IInvoice, "id" | "userId" | "createdAt" | "updatedAt">
+  >,
+) => {
+  try {
+    const ref = doc(db, COLLECTIONS.INVOICES, id);
+
+    await updateDoc(ref, {
+      ...contactData,
+      updatedAt: Timestamp.now(),
+    });
+
+    return id;
+  } catch (error) {
     throw error;
   }
 };

@@ -1,23 +1,29 @@
 "use client";
 
 import { AppShell } from "@/components/layout/AppShell";
-import { getAllInvoices,  } from "@/lib/firebase/firestore";
-import { IInvoice,  } from "@/types";
-import { Plus, Search, } from "lucide-react";
+import { getAllInvoices } from "@/lib/firebase/firestore";
+import { IInvoice } from "@/types";
+import { ArrowRight, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import moment from "moment";
+import { getAuth } from "firebase/auth";
 
 const tableCellClassname =
   "px-4 py-2.5 border-b border-gray-200 group-last:border-b-0";
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<IInvoice[]>([]);
+
+  const auth = getAuth();
   useEffect(() => {
-    getAllInvoices().then((r) => {
-      setInvoices(r);
-    });
-  }, []);
+    const userId = auth.currentUser?.uid;
+    if (userId) {
+      getAllInvoices(userId).then((r) => {
+        setInvoices(r);
+      });
+    }
+  }, [auth]);
   return (
     <AppShell>
       {() => (
@@ -105,6 +111,16 @@ export default function InvoicesPage() {
                     >
                       {item?.items?.length}
                     </span>
+                  </td>
+
+                  <td>
+                    <Link
+                      href={`/dashboard/invoices/edit-invoice/${item.id}`}
+                      className="inline-flex items-center gap-1 rounded-full border border-gray-300 bg-black px-2 py-1 text-[11px] text-white hover:bg-black/90"
+                    >
+                      View
+                      <ArrowRight className="h-3 w-3" />
+                    </Link>
                   </td>
                 </tr>
               ))}

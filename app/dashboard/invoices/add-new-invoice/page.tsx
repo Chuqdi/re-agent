@@ -3,18 +3,14 @@ import AppShell from "@/components/layout/AppShell";
 import AddInvoiceItemSection from "@/components/sections/AddInvoiceItemSection";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import SelectOption from "@/components/ui/SelectOption";
-import {
-  createNewInvoice,
-  createNewShowing,
-  getAllContacts,
-} from "@/lib/firebase/firestore";
-import { IContact, IInvoiceItem } from "@/types";
+import { createNewInvoice } from "@/lib/firebase/firestore";
+import { IInvoiceItem } from "@/types";
 import { useFormik } from "formik";
-import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import * as yup from "yup";
+import SingleInvoiceItem from "../components/SingleInvoiceItem";
+import { getAuth } from "firebase/auth";
 
 const scheme = yup.object({
   companyName: yup.string().required("Required"),
@@ -27,6 +23,9 @@ function AddNewInvoice() {
   const [isLoading, setIsLoading] = useState(false);
   const [invoiceItems, setInvoiceItems] = useState<IInvoiceItem[]>([]);
   const [activeInvoiceItem, setActiveInvoiceItem] = useState<IInvoiceItem>();
+  const [isShowingAddItemsInputs, setIsShowingAddItemsInputs] = useState(false);
+  const auth = getAuth();
+
   const onSubmit = async (data: {
     companyName: string;
     address: string;
@@ -38,11 +37,14 @@ function AddNewInvoice() {
     }
     setIsLoading(true);
     try {
-      createNewInvoice({
-        ...data,
-        items: invoiceItems,
-      });
-      router.push("/dashboard/invoices/");
+      const userId = auth.currentUser?.uid;
+      if (userId) {
+        createNewInvoice(userId, {
+          ...data,
+          items: invoiceItems,
+        });
+        router.push("/dashboard/invoices/");
+      }
     } catch (error) {
       alert("Error creating requests");
     }
@@ -107,35 +109,43 @@ function AddNewInvoice() {
                 </div>
               </div>
 
-              <h1 className="text-lg font-semibold tracking-tight text-black">
-                Add Invoice Items
-              </h1>
-
               <div className="flex flex-col gap-4">
-                {invoiceItems.map((invoice, index) => (
-                  <div
-                    className="flex items-center justify-between bg-white px-4 py-2 border border-[#bdbdbd3e] rounded-xl w-full"
-                    key={`single_invoice_item_${invoice.id}_${index}`}
-                  >
-                    <div>
-                      <h5 className="text-lg font-bold">{invoice.amount}</h5>
-                      <p className="text-base ">{invoice.description}</p>
-                    </div>
-                    <button
-                      onClick={() => setActiveInvoiceItem(invoice)}
-                      className="p-2 rounded bg-[#4b4b4b8c]"
-                    >
-                      <Pencil size={15} color="#fff" />
-                    </button>
+                <h1 className="text-lg font-semibold tracking-tight text-black">
+                  Invoice Items
+                </h1>
+                {!!invoiceItems?.length && (
+                  <div className="flex flex-col gap-4 mb-6">
+                    {invoiceItems.map((invoiceItem, index) => (
+                      <SingleInvoiceItem
+                        key={`single_invoice_item_${invoiceItem.id}_${index}`}
+                        onDeleteInvoice={() => {
+                          setInvoiceItems((items) =>
+                            items?.filter((i) => i?.id !== invoiceItem.id),
+                          );
+                        }}
+                        invoiceItem={invoiceItem}
+                        setItems={setInvoiceItems}
+                        updateInvoiceItem={(item: IInvoiceItem) => {
+                          setInvoiceItems((items) => {
+                            return items.map((i) => {
+                              if (i.id === invoiceItem?.id) return item;
+                              else return i;
+                            });
+                          });
+                        }}
+                      />
+                    ))}
                   </div>
-                ))}
-              </div>
+                )}
 
-              <AddInvoiceItemSection
-                setActiveInvoiceItem={setActiveInvoiceItem}
-                activeInvoiceItem={activeInvoiceItem}
-                setItems={setInvoiceItems}
-              />
+                <AddInvoiceItemSection
+                  setActiveInvoiceItem={setActiveInvoiceItem}
+                  isShowingAddItemsInputs={isShowingAddItemsInputs}
+                  setIsShowingAddItemsInputs={setIsShowingAddItemsInputs}
+                  activeInvoiceItem={activeInvoiceItem}
+                  setItems={setInvoiceItems}
+                />
+              </div>
             </div>
             <div className="flex items-center gap-4">
               <Button

@@ -6,7 +6,8 @@ import { Pencil, Plus } from "lucide-react";
 import { IInvoiceItem } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 import Textarea from "../ui/TextArea";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const scheme = yup.object({
   description: yup.string().required("Required"),
@@ -20,10 +21,16 @@ function AddInvoiceItemSection({
   activeInvoiceItem,
   setItems,
   setActiveInvoiceItem,
+  isShowingAddItemsInputs,
+  setIsShowingAddItemsInputs,
 }: {
   activeInvoiceItem?: IInvoiceItem;
   setItems: React.Dispatch<React.SetStateAction<IInvoiceItem[]>>;
-  setActiveInvoiceItem: React.Dispatch<React.SetStateAction<IInvoiceItem|undefined>>;
+  setIsShowingAddItemsInputs: React.Dispatch<React.SetStateAction<boolean>>;
+  isShowingAddItemsInputs: boolean;
+  setActiveInvoiceItem: React.Dispatch<
+    React.SetStateAction<IInvoiceItem | undefined>
+  >;
 }) {
   const onSubmit = (
     data: {
@@ -59,8 +66,10 @@ function AddInvoiceItemSection({
     } else {
       setItems((its) => [...its, { ...data, id: uuidv4() }]);
     }
-    setActiveInvoiceItem(undefined)
+    setActiveInvoiceItem(undefined);
     action.resetForm();
+    setIsShowingAddItemsInputs(false);
+   
   };
 
   const {
@@ -95,73 +104,90 @@ function AddInvoiceItemSection({
   }, [activeInvoiceItem]);
 
   return (
-    <form className="space-y-7" onSubmit={handleSubmit}>
-      <div className="flex items-start gap-4">
-        <div className="flex-1">
-          <Input
-            label="Quantity"
-            type="number"
-            value={values.quantity}
-            onChange={handleChange("quantity")}
-            errorMessage={touched.quantity ? errors.quantity : ""}
-            required
-          />
-        </div>
+    <form
+      className=" space-y-7"
+      onSubmit={(e) => {
+        e.preventDefault();
+        isShowingAddItemsInputs
+          ? handleSubmit()
+          : setIsShowingAddItemsInputs(true);
+      }}
+    >
+      <AnimatePresence>
+        {isShowingAddItemsInputs && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25 }}
+            className=" space-y-7"
+          >
+            <div className="flex items-start gap-4">
+              <div className="flex-1">
+                <Input
+                  label="Quantity"
+                  type="number"
+                  value={values.quantity}
+                  onChange={handleChange("quantity")}
+                  errorMessage={touched.quantity ? errors.quantity : ""}
+                  required
+                />
+              </div>
 
-        <div className="flex-1">
-          <Input
-            label="Rate"
-            type="number"
-            value={values.rate}
-            onChange={handleChange("rate")}
-            errorMessage={touched?.rate ? errors.rate : ""}
-            placeholder="eg. 30 per day"
-          />
-        </div>
-      </div>
+              <div className="flex-1">
+                <Input
+                  label="Rate"
+                  type="number"
+                  value={values.rate}
+                  onChange={handleChange("rate")}
+                  errorMessage={touched?.rate ? errors.rate : ""}
+                  placeholder="eg. 30"
+                />
+              </div>
+            </div>
 
-      <div className="flex items-start gap-4">
-        <div className="flex-1">
-          <Input
-            label="Tax"
-            value={values.tax}
-            type="number"
-            onChange={handleChange("tax")}
-            errorMessage={touched?.tax ? errors.tax : ""}
-            required
-          />
-        </div>
+            <div className="flex items-start gap-4">
+              <div className="flex-1">
+                <Input
+                  label="Tax"
+                  value={values.tax}
+                  type="number"
+                  onChange={handleChange("tax")}
+                  errorMessage={touched?.tax ? errors.tax : ""}
+                  required
+                />
+              </div>
 
-        <div className="flex-1">
-          <Input
-            label="Amount"
-            value={values.amount}
-            type="number"
-            onChange={handleChange("amount")}
-            errorMessage={touched.amount ? errors.amount : ""}
-            placeholder="eg. 30,000"
-          />
-        </div>
-      </div>
+              <div className="flex-1">
+                <Input
+                  label="Amount"
+                  value={values.amount}
+                  type="number"
+                  onChange={handleChange("amount")}
+                  errorMessage={touched.amount ? errors.amount : ""}
+                  placeholder="eg. 30"
+                />
+              </div>
+            </div>
 
-      <Textarea
-        value={values.description}
-        onChange={handleChange("description")}
-        errorMessage={touched.description ? errors.description : ""}
-      />
+            <Textarea
+              value={values.description}
+              onChange={handleChange("description")}
+              errorMessage={touched.description ? errors.description : ""}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="flex w-full justify-center items-end">
         <Button
           variant="secondary"
-          title={activeInvoiceItem?.id ? "Edit" : "Add"}
-          className="w-full md:w-[10%]"
+          title={isShowingAddItemsInputs ? "Submit" : "Add Invoice Item"}
+          className="w-full "
           type="button"
           rightIcon={
-            activeInvoiceItem?.id ? (
-              <Pencil size={18} color="#000" />
-            ) : (
-              <Plus color="#000" size={20} />
-            )
+          
+            <Plus color="#000" size={20} />
           }
         />
       </div>
