@@ -53,6 +53,8 @@ export interface Showing {
   address: string;
   listingId?: string;
   clientId?: string;
+  client?: string;
+  showingTime?: string;
   calendarEventId: string;
   title: string;
   description?: string;

@@ -2,6 +2,9 @@
 
 import { AppShell } from "@/components/layout/AppShell";
 import { ArrowUpRight, FileText, Users, CalendarDays,GitPullRequest } from "lucide-react";
+import { getAllRequests, getShowings,updateShowingInvitees } from "@/lib/firebase/firestore";
+import { IRequest, Showing } from "@/types";
+import { useEffect, useState } from "react";
 
 
 
@@ -76,6 +79,34 @@ const pipeline = [
 ];
 
 export default function DashboardPage() {
+
+  const [requests, setRequests] = useState<IRequest[]>();
+
+const [allShowings, setAllShowings] = useState<Showing[]>([]);
+
+
+  useEffect(() => {
+    getAllRequests().then((r) => {
+    setRequests(r);
+    });
+    }, []);
+    
+    
+    
+    
+    useEffect(() => {
+    const loadShowings = async () => {
+    try {
+    const showings = await getShowings();
+    setAllShowings(showings);
+    } catch (error) {
+    console.error("Error loading showings:", error);
+    }
+    };
+    loadShowings();
+    }, []);
+
+
   return (
     <AppShell>
       {(user) => (
@@ -109,12 +140,12 @@ export default function DashboardPage() {
                   </p>
                   <div className="mt-2 flex items-baseline gap-2">
                     <span className="text-3xl font-semibold text-black">
-                      {showingsSummary.today}
+                      {allShowings && allShowings.length}
                     </span>
                     <span className="text-xs text-gray-500">today</span>
                   </div>
                   <p className="mt-1 text-[11px] text-gray-500">
-                    {showingsSummary.week} scheduled this week
+                    {/*{showingsSummary.week} scheduled this week*/}
                   </p>
                 </div>
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-gray-100">
@@ -122,13 +153,13 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="mt-4 space-y-2">
-                {showingsSummary.upcoming.map((item) => (
+                {allShowings && allShowings.slice(0,3).map((item) => (
                   <div
-                    key={item.time + item.address}
+                    key={item.showingTime + item.address}
                     className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-3 py-2"
                   >
                     <div>
-                      <p className="text-xs text-gray-600">{item.time}</p>
+                      <p className="text-xs text-gray-600">{item.showingTime}</p>
                       <p className="text-xs font-medium text-black">
                         {item.address}
                       </p>
@@ -154,7 +185,7 @@ export default function DashboardPage() {
                   </p>
                   <div className="mt-2 flex items-baseline gap-2">
                     <span className="text-3xl font-semibold text-black">
-                      {clientsSummary.active}
+                      {requests && requests.length/*clientsSummary.active*/}
                     </span>
                     <span className="text-xs text-gray-500">active</span>
                   </div>
@@ -167,17 +198,18 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="flex-1 space-y-2 text-xs mt-4">
-                {requestsContents.map((file) => (
+                {requests && requests.slice(0,3).map((file) => (
                   <div
-                    key={file.name}
+                    key={file.property}
                     className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-3 py-2"
                   >
                     <div className="min-w-0">
                       <p className="truncate text-[12px] text-black">
-                        {file.name}
+                        {file.property}
                       </p>
                       <p className="mt-0.5 text-[11px] text-gray-500">
-                        {file.status} · Updated {file.updated}
+                       {file.type} · Updated{" "}
+                       {new Date(file.updatedAt.seconds * 1000).toLocaleString()}
                       </p>
                     </div>
                     <button className="inline-flex h-7 items-center gap-1 rounded-full border border-gray-300 bg-black px-2 text-[11px] text-white hover:bg-black/90">
@@ -194,7 +226,7 @@ export default function DashboardPage() {
               <div className="mb-3 flex items-center justify-between">
                 <div>
                   <p className="text-[11px] uppercase tracking-[0.18em] text-gray-500">
-                    Recent Files
+                    {/*Recent Files*/}
                   </p>
                   <p className="mt-1 text-[11px] text-gray-500">
                     From your Vault workspace
@@ -232,7 +264,7 @@ export default function DashboardPage() {
               <div className="mb-3 flex items-center justify-between">
                 <div>
                   <p className="text-[11px] uppercase tracking-[0.18em] text-gray-500">
-                    Active Pipeline
+                    {/*Active Pipeline*/}
                   </p>
                   <p className="mt-1 text-[11px] text-gray-500">
                     Conversion by stage (last 30 days)
