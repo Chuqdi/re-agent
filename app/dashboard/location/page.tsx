@@ -81,7 +81,7 @@ export default function LocationPage() {
 
 
  useEffect(() => {
-  getAllRequests().then((r) => {
+  getShowings()/*getAllRequests()*/.then((r) => {
     setRequests(r);
   });
 }, []);
@@ -263,9 +263,9 @@ export default function LocationPage() {
               <p className="mt-1 text-xs text-gray-500">
                 Track agents in the field and share secure location links.
               </p>
-              {!!locationError && (
+              {/*!!locationError && (
                 <p className="mt-1 text-xs text-amber-600">⚠ {locationError}</p>
-              )}
+              )*/}
             </div>
 
             {/* Invite bar */}

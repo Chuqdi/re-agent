@@ -46,6 +46,9 @@ export interface Listing {
   updatedAt: Date;
 }
 
+
+
+
 export interface Showing {
   id: string;
   showingID: string;
@@ -109,6 +112,12 @@ export interface IRequest {
 }
 
 
+export interface ICompany {
+  companyName: string;
+  companyID: string;
+}
+
+
 export interface IUser {
   uid: string;
   property: string;
@@ -129,6 +138,7 @@ export interface IShowing {
   address: string;
   city: string;
   state: string;
+  coordinates: { lat: number; lng: number };
   showingTime: string;
   invitee: string;
   createdAt: string;
