@@ -72,7 +72,7 @@ export function AppShell({ children }: AppShellProps) {
       const hasDataQuery = typeof window !== "undefined" && window.location.search.includes("data=");
   
       // 🚨 If no user → force login (except allowed route)
-      if (!u && pathname !== "/login" && !(isMyLocationRoute && hasDataQuery)) {
+      if (!u && pathname !== "/login" && !(isMyLocationRoute)) {
         router.push("/login");
       }
   
