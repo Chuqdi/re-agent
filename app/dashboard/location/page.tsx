@@ -55,7 +55,7 @@ const demoAgents: LocationAgent[] = [
 
 export default function LocationPage() {
   const { location, error: locationError } = useGeoLocation();
-  const [requests, setRequests] = useState<IRequest[]>();
+  const [requests, setRequests] = useState<Showing[]>(); //march 31st 2026  -will change variable later
   const [selectedRequestID, setSelectedRequestID] = useState<string>();
 
   const [filter, setFilter] = useState<string>("all");
