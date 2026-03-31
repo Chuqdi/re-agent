@@ -60,7 +60,7 @@ export function AppShell({ children }: AppShellProps) {
   //}, []);
 
 
-
+  const isMyLocationRoute = pathname.startsWith("/dashboard/mylocation");
 
 
   useEffect(() => {
@@ -68,7 +68,7 @@ export function AppShell({ children }: AppShellProps) {
       setUser(u);
       setLoading(false);
   
-      const isMyLocationRoute = pathname.startsWith("/dashboard/mylocation");
+      
      // const hasDataQuery = typeof window !== "undefined" && window.location.search.includes("data=");
   
       // 🚨 If no user → force login (except allowed route)
