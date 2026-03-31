@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter,usePathname } from 'next/navigation';
 import { signInWithEmail, signInWithGoogle } from '@/lib/firebase/auth';
 import { setPersistence, browserSessionPersistence, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
@@ -14,6 +14,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const pathname = usePathname();
+
+
+
+
+  
+     
 
 useEffect(()=>{
   //signOut(auth)
@@ -28,7 +35,17 @@ useEffect(()=>{
 
       await setPersistence(auth, browserSessionPersistence);
       await signInWithEmail(email, password);
-      router.push('/');
+
+      const isMyLocationRoute = pathname.startsWith("/dashboard/mylocation");
+
+      if(isMyLocationRoute){
+        router.push(pathname);
+      }else{
+        router.push('/');
+      }
+      
+
+
       router.refresh();
     } catch (err: any) {
       console.error('Sign in error:', err);
