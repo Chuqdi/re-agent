@@ -40,9 +40,9 @@ const navItems = [
 ];
 
 export function AppShell({ children }: AppShellProps) {
-  const [user, setUser] = useState<FirebaseUser | null>(
-   /* {
-    //companyID:"lxbeDfgyMIL8yPbp2khs",
+  const [user, setUser] = useState<any| null>(
+    {
+    companyID:"lxbeDfgyMIL8yPbp2khs",
     createdAt:"March 10, 2026 at 4:12:59 PM UTC+1",
     displayName:"Hezekiah",
     email:"morganhezekiah111@gmail.com",
@@ -50,7 +50,7 @@ export function AppShell({ children }: AppShellProps) {
     phoneNumber:"081736504445",
     uid:'0kfrprO5NzUJmPjrsiLUgP5n8hf1',
     updatedAt:"March 10, 2026 at 4:12:59 PM UTC+1"
-  }*/);
+  });
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
@@ -241,7 +241,7 @@ export function AppShell({ children }: AppShellProps) {
 
       <main className="flex min-h-screen min-w-0 flex-1 flex-col overflow-x-hidden bg-white md:ml-0">
         <div className="min-w-0 flex-1 px-6 pb-8 pt-20 md:pt-6 lg:px-10 lg:pt-8">
-          {user && children(user)}
+          {children(user && user)}
         </div>
       </main>
     </div>
