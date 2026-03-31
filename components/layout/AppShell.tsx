@@ -40,7 +40,8 @@ const navItems = [
 ];
 
 export function AppShell({ children }: AppShellProps) {
-  const [user, setUser] = useState<FirebaseUser | null>({
+  const [user, setUser] = useState<FirebaseUser | null>(
+   /* {
     //companyID:"lxbeDfgyMIL8yPbp2khs",
     createdAt:"March 10, 2026 at 4:12:59 PM UTC+1",
     displayName:"Hezekiah",
@@ -49,7 +50,7 @@ export function AppShell({ children }: AppShellProps) {
     phoneNumber:"081736504445",
     uid:'0kfrprO5NzUJmPjrsiLUgP5n8hf1',
     updatedAt:"March 10, 2026 at 4:12:59 PM UTC+1"
-  });
+  }*/);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
