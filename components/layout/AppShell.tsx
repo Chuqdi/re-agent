@@ -114,7 +114,7 @@ export function AppShell({ children }: AppShellProps) {
     );
   }
 
-  if (!user) {
+  if (!user && !(isMyLocationRoute)) {
     return <LoginPage />;
   }
 
