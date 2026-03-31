@@ -207,7 +207,7 @@ export function AppShell({ children }: AppShellProps) {
                     ? user.displayName
                         .split(" ")
                         .slice(0, 2)
-                        .map((n) => n[0])
+                        .map((n: string) => n[0])
                         .join("")
                     : (user?.email?.[0]?.toUpperCase() ?? "?")}
                 </div>
