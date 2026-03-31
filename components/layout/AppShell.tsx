@@ -69,12 +69,16 @@ export function AppShell({ children }: AppShellProps) {
       setLoading(false);
   
       const isMyLocationRoute = pathname.startsWith("/dashboard/mylocation");
-      const hasDataQuery = typeof window !== "undefined" && window.location.search.includes("data=");
+     // const hasDataQuery = typeof window !== "undefined" && window.location.search.includes("data=");
   
       // 🚨 If no user → force login (except allowed route)
       if (!u && pathname !== "/login" && !(isMyLocationRoute)) {
         router.push("/login");
       }
+
+    //  if(isMyLocationRoute){
+    //    router.push(pathname);
+    //  }
   
   
       // 🚨 If user is logged in and tries to go to login page
