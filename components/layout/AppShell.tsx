@@ -199,7 +199,7 @@ export function AppShell({ children }: AppShellProps) {
                         .slice(0, 2)
                         .map((n) => n[0])
                         .join("")
-                    : (user && user.email?.[0]?.toUpperCase() ?? "?")}
+                    : (user?.email?.[0]?.toUpperCase() ?? "?")}
                 </div>
                 <div className="flex flex-col">
                   <span className="text-xs font-medium text-black">
