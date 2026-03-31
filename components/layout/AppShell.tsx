@@ -193,20 +193,20 @@ export function AppShell({ children }: AppShellProps) {
             <div className="mb-2 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-[11px] font-medium uppercase text-black">
-                  {user.displayName
+                  {user && user.displayName
                     ? user.displayName
                         .split(" ")
                         .slice(0, 2)
                         .map((n) => n[0])
                         .join("")
-                    : (user.email?.[0]?.toUpperCase() ?? "?")}
+                    : (user && user.email?.[0]?.toUpperCase() ?? "?")}
                 </div>
                 <div className="flex flex-col">
                   <span className="text-xs font-medium text-black">
-                    {user.displayName || user.email?.split("@")[0]}
+                    {user && user.displayName || user && user.email?.split("@")[0]}
                   </span>
                   <span className="text-[10px] text-gray-500">
-                    {user.email}
+                    {user && user.email}
                   </span>
                 </div>
               </div>
