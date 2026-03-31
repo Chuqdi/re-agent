@@ -41,7 +41,7 @@ const navItems = [
 
 export function AppShell({ children }: AppShellProps) {
   const [user, setUser] = useState<FirebaseUser | null>({
-    companyID:"lxbeDfgyMIL8yPbp2khs",
+    //companyID:"lxbeDfgyMIL8yPbp2khs",
     createdAt:"March 10, 2026 at 4:12:59 PM UTC+1",
     displayName:"Hezekiah",
     email:"morganhezekiah111@gmail.com",
