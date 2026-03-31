@@ -36,6 +36,10 @@ function AddNewShowing() {
       const requestData = {
         ...data,
         showingTime: new Date(data.showingTime).toISOString(),
+        coordinates:{ //mar 31st assign to hezekiah to use geographical data
+          lat:6.30,
+          lng:4.01
+        }
       };
       await createNewShowing(requestData);
       router.push("/dashboard/showings");
