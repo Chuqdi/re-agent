@@ -426,14 +426,10 @@ export const createNewRequest = async (
   }
 };
 
-
-
-
-
 export const updateCurrentRequest = async (
   requestID: string,
   propertyData: Omit<IRequest, "id" | "userId" | "createdAt" | "updatedAt">,
-  userId: string
+  userId: string,
 ) => {
   try {
     const docRef = doc(db, COLLECTIONS.REQUESTS, requestID);
@@ -450,9 +446,6 @@ export const updateCurrentRequest = async (
     throw error;
   }
 };
-
-
-
 
 export const getAllRequests: () => Promise<IRequest[]> = async () => {
   try {
@@ -473,7 +466,6 @@ export const getAllRequests: () => Promise<IRequest[]> = async () => {
     throw error;
   }
 };
-
 
 export const getAllUsers: () => Promise<IUser[]> = async () => {
   try {
@@ -554,11 +546,13 @@ export const getContactWithID = async (
   }
 };
 
-export const getAllContacts: (userId:string) => Promise<IContact[]> = async (userId:string) => {
+export const getAllContacts: (userId: string) => Promise<IContact[]> = async (
+  userId: string,
+) => {
   try {
     const q = query(
       collection(db, COLLECTIONS.CONTACTS),
-      where("userId", "==", userId)
+      where("userId", "==", userId),
     );
 
     const querySnapshot = await getDocs(q);
@@ -596,7 +590,29 @@ export const createNewShowing = async (
   }
 };
 
+export const getAllShowings: (
+) => Promise<IShowing[]> = async () => {
+  try {
+    // const q = query(collection(db, COLLECTIONS.SHOWINGS));
+    const q = query(
+      collection(db, COLLECTIONS.SHOWINGS),
+      orderBy("createdAt"),
+    );
 
+    const querySnapshot = await getDocs(q);
+    const showings = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }))as IShowing[];
+
+     
+
+    return showings;
+  } catch (error) {
+    console.error("Error fetching showings:", error);
+    throw error;
+  }
+};
 
 export const getShowingByID = async (showingID: string) => {
   const ref = doc(db, COLLECTIONS.SHOWINGS, showingID);
@@ -607,8 +623,6 @@ export const getShowingByID = async (showingID: string) => {
   return snapshot.data();
 };
 
-
-
 export const getRequestByID = async (requestID: string) => {
   const ref = doc(db, COLLECTIONS.REQUESTS, requestID);
   const snapshot = await getDoc(ref);
@@ -618,10 +632,9 @@ export const getRequestByID = async (requestID: string) => {
   return snapshot.data();
 };
 
-
 export const updateShowingInvitees = async (
   showingID: string,
-  newEmail: string
+  newEmail: string,
 ) => {
   try {
     const showingRef = doc(db, COLLECTIONS.SHOWINGS, showingID);
@@ -671,7 +684,7 @@ export const getAllInvoices: (userId: string) => Promise<IInvoice[]> = async (
   try {
     const q = query(
       collection(db, COLLECTIONS.INVOICES),
-      where("userId", "==", userId)
+      where("userId", "==", userId),
       // orderBy("createdAt"),
     );
 

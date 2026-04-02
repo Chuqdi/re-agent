@@ -33,3 +33,8 @@ body {
   }
 }
 
+
+
+.fc .fc-day-today {
+  background: inherit !important;
+}
