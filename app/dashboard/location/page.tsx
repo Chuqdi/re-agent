@@ -78,6 +78,14 @@ export default function LocationPage() {
 
 
  const [selectedRequest, setSelectedRequest] = useState<any|undefined>(); //could be IRequest or showing
+ const [showDropdown, setShowDropdown] = useState(false);
+
+ const filteredUsers =
+  inviteEmail.trim() === ""
+    ? selectedRequest?.invitees || []
+    : selectedRequest?.invitees?.filter((email: string) =>
+        email.toLowerCase().includes(inviteEmail.toLowerCase())
+      ) || [];
 
 
  useEffect(() => {
@@ -268,23 +276,49 @@ export default function LocationPage() {
               )*/}
             </div>
 
-            {/* Invite bar */}
-            <div className="flex w-full max-w-md items-center gap-2 rounded-full border border-gray-300 bg-white px-3 py-1.5">
-              <input
-                type="email"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder="Invite agent by email"
-                className="h-7 flex-1 bg-transparent text-xs text-black placeholder:text-gray-400 focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={handleInvite}
-                className="inline-flex h-7 items-center rounded-full bg-black px-3 text-[11px] font-medium text-white hover:bg-black/90"
-              >
-                Send Invite
-              </button>
-            </div>
+            <div className="relative w-full max-w-md">
+  {/* Invite bar */}
+  <div className="flex items-center gap-2 rounded-full border border-gray-300 bg-white px-3 py-1.5">
+    <input
+      type="email"
+      value={inviteEmail}
+      onChange={(e) => {
+        setInviteEmail(e.target.value);
+        setShowDropdown(true);
+      }}
+      onFocus={() => setShowDropdown(true)}
+      onBlur={() => setTimeout(() => setShowDropdown(false), 150)} // delay so click works
+      placeholder="Invite agent by email"
+      className="h-7 flex-1 bg-transparent text-xs text-black placeholder:text-gray-400 focus:outline-none"
+    />
+
+    <button
+      type="button"
+      onClick={handleInvite}
+      className="inline-flex h-7 items-center rounded-full bg-black px-3 text-[11px] font-medium text-white hover:bg-black/90"
+    >
+      Send Invite
+    </button>
+  </div>
+
+  {/* Dropdown */}
+  {showDropdown  && filteredUsers.length > 0 && (
+    <div className="absolute z-10 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-md">
+      {filteredUsers.map((email: string, index: number) => (
+        <div
+          key={index}
+          onClick={() => {
+            setInviteEmail(email);
+            setShowDropdown(false);
+          }}
+          className="cursor-pointer px-3 py-2 text-xs text-gray-700 hover:bg-gray-100"
+        >
+          {email}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
           </header>
 
           {/* Filters */}
