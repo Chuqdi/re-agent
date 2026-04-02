@@ -38,3 +38,11 @@ body {
 .fc .fc-day-today {
   background: inherit !important;
 }
+
+.fc-event,
+.fc-event-main {
+  background: white !important;
+  border: none !important;
+  box-shadow: none !important;
+  
+}

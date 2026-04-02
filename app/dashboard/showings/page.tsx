@@ -6,7 +6,7 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { getAllShowings } from "@/lib/firebase/firestore";
 import { IShowing } from "@/types";
-import ShowingsCalendarSection from "@/components/sections/ShowingsCalendarSection";
+import ShowingsCalendarViewSection from "@/components/sections/ShowingsCalendarViewSection";
 
 export default function ShowingsPage() {
   const [showings, setShowings] = useState<IShowing[]>();
@@ -43,7 +43,7 @@ export default function ShowingsPage() {
             </div> */}
           </header>
 
-          {showings && <ShowingsCalendarSection showings={showings} />}
+          {showings && <ShowingsCalendarViewSection showings={showings} />}
         </div>
       )}
     </AppShell>

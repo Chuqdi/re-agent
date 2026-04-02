@@ -54,7 +54,7 @@ function parseShowingDateTime(showing: IShowing): Date | null {
 
   return parsed;
 }
-// ✅ Moved outside component
+
 function mapShowingToEvent(showing: IShowing) {
   const start = parseShowingDateTime(showing);
 
@@ -75,7 +75,6 @@ function mapShowingToEvent(showing: IShowing) {
   };
 }
 
-// ✅ Moved outside component
 type CalendarEvent = NonNullable<ReturnType<typeof mapShowingToEvent>>;
 
 function renderEventContent(arg: EventContentArg) {
@@ -88,9 +87,11 @@ function renderEventContent(arg: EventContentArg) {
     minute: "2-digit",
   });
   return (
-    <div className="rounded-lg border border-sky-500/30 bg-sky-50 px-2 py-1.5  text-[11px] text-sky-800">
-      <p className="text-[11px] font-medium text-sky-900">{arg.event.title}</p>
-      <p className="text-[10px] text-sky-800">
+    <div className="rounded-lg border-none border-sky-500/30 bg-sky-50 px-2 py-1.5 text-[11px] text-sky-800 mx-2 overflow-hidden">
+      <p className="text-[11px] font-medium text-sky-900 break-words whitespace-normal">
+        {arg.event.title}
+      </p>
+      <p className="text-[10px] text-sky-800 break-words whitespace-normal">
         {time} · {invitee}
       </p>
     </div>
@@ -101,7 +102,7 @@ interface Props {
   showings: IShowing[];
 }
 
-function ShowingsCalendarSection({ showings }: Props) {
+function ShowingsCalendarViewSection({ showings }: Props) {
   const calendarRef = useRef<FullCalendar>(null);
   const [currentView, setCurrentView] = useState<CalendarView>("timeGridDay");
   const [title, setTitle] = useState("");
@@ -193,15 +194,14 @@ function ShowingsCalendarSection({ showings }: Props) {
                 const month = arg.date.toLocaleString("default", {
                   month: "short",
                 });
-                // Only show month on the 1st of the month
                 return day === 1 ? `${month} ${day}` : `${day}`;
               },
             },
             timeGridWeek: {
-              dayHeaderFormat: { weekday: "short", day: "numeric" }, // "Mon 4"
+              dayHeaderFormat: { weekday: "short", day: "numeric" }, 
             },
             timeGridDay: {
-              dayHeaderFormat: { weekday: "long", day: "numeric" }, // "Wednesday 4"
+              dayHeaderFormat: { weekday: "long", day: "numeric" },
             },
           }}
         />
@@ -210,4 +210,4 @@ function ShowingsCalendarSection({ showings }: Props) {
   );
 }
 
-export default ShowingsCalendarSection;
+export default ShowingsCalendarViewSection;
