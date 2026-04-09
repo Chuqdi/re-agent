@@ -244,6 +244,33 @@ export const createShowing = async (
   return showingId;
 };
 
+
+export async function getUsersByEmails(
+  emails: string[]
+): Promise<User[]> {
+  if (!emails.length) return [];
+
+  try {
+    // Firestore "in" query supports max 10 values at once
+    const usersRef = collection(db, "users");
+
+    const q = query(usersRef, where("email", "in", emails));
+
+    const snapshot = await getDocs(q);
+
+    const users: User[] = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as Omit<User, "id">),
+    }));
+
+    return users;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return [];
+  }
+}
+
+
 export const getShowings = async (): Promise<Showing[]> => {
   const snapshot = await getDocs(showingsCollection);
 
