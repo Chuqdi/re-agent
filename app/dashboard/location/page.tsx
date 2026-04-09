@@ -325,7 +325,7 @@ export default function LocationPage() {
           subject: "Your Invitation to Our Showing",
           htmlMessage: emailHTML,
           name: "John Test",
-          userEmail: "info@reagents.com",
+          userEmail: "info@nurturer.ai", //change to re-agents later
         }),
       });
 
