@@ -1,7 +1,6 @@
 // Firestore Collection Types
 
 import { Timestamp } from "firebase/firestore";
-import { number } from "yup";
 
 export interface User {
   uid: string;
@@ -12,8 +11,9 @@ export interface User {
   googleAccessToken?: string;
   googleDriveFolderId?: string;
   googleDriveFolderLink?: string;
-  createdAt: Date;
+  createdAt: Timestamp;
   updatedAt: Date;
+  address_coordinates:{lng:string; lat:string}
 }
 
 export interface Client {
@@ -53,8 +53,14 @@ export interface Showing {
   id: string;
   showingID: string;
   agentId: string;
+  invitees:string[];
   address: string;
   listingId?: string;
+  coordinates:{
+    lat:number;
+    lng:number;
+  }
+  property?:string;
   clientId?: string;
   client?: string;
   showingTime?: string;
@@ -141,6 +147,7 @@ export interface IShowing {
   coordinates: { lat: number; lng: number };
   showingTime: string;
   invitee: string;
+  invitees: string[];
   createdAt: string;
   updatedAt: string;
 }
