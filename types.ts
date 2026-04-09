@@ -147,7 +147,6 @@ export interface IShowing {
   coordinates: { lat: number; lng: number };
   showingTime: string;
   invitee: string;
-  invitees: string[];
   createdAt: string;
   updatedAt: string;
   invitees?: string[];
