@@ -76,7 +76,7 @@ export const calendarEventToShowing = (
   listingId?: string,
   clientId?: string,
  
-): Omit<Showing, 'id' | 'createdAt' | 'updatedAt'|'address'| 'showingID'  > => { // feb 2 2026 - I omitted address
+): Omit<Showing, 'id' | 'createdAt' | 'updatedAt'|'address'| 'showingID'|'invitees'|'coordinates'  > => { // feb 2 2026 - I omitted address
   return {
     
     agentId,
@@ -89,6 +89,7 @@ export const calendarEventToShowing = (
     endTime: new Date(event.end.dateTime),
     location: event.location || '',
     status: 'scheduled',
+    
   };
 };
 
