@@ -48,7 +48,7 @@ function AddNewShowing() {
     }
     setIsLoading(false);
   };
-  const { values, handleSubmit, handleChange, errors, touched } = useFormik({
+  const { values, handleSubmit, handleChange, errors,  } = useFormik({
     validationSchema: scheme,
     onSubmit,
     initialValues: {
@@ -124,7 +124,7 @@ function AddNewShowing() {
                     onChange={handleChange("showingTime")}
                     errorMessage={errors.showingTime}
                     required
-                    type="date"
+                    type="datetime-local"
                   />
                 </div>
 
