@@ -143,6 +143,7 @@ export interface IShowing {
   invitee: string;
   createdAt: string;
   updatedAt: string;
+  invitees?: string[];
 }
 
 export interface IContact {

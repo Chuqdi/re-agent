@@ -39,7 +39,8 @@ function AddNewShowing() {
         coordinates:{ //mar 31st assign to hezekiah to use geographical data
           lat:6.30,
           lng:4.01
-        }
+        },
+        invitees:[]
       };
       await createNewShowing(requestData);
       router.push("/dashboard/showings");

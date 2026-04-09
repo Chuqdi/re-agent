@@ -283,6 +283,7 @@ export default function LocationPage() {
       type="email"
       value={inviteEmail}
       onChange={(e) => {
+        console.log("WHAT IS INVITE EMAIL BEING TYPED IN--->",e.target.value)
         setInviteEmail(e.target.value);
         setShowDropdown(true);
       }}
