@@ -315,7 +315,7 @@ export default function LocationPage() {
         inviteEmail,
       );
 
-      const res = await fetch("/api/send-email", {
+      const res = await fetch("https://nurturer-sendgrid-backend.vercel.app/send-email", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
