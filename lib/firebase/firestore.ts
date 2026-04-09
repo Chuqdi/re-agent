@@ -73,7 +73,7 @@ export const getUser = async (uid: string): Promise<User | null> => {
     ...data,
     createdAt: timestampToDate(data.createdAt),
     updatedAt: timestampToDate(data.updatedAt),
-  } as User;
+  } as unknown as User;
 };
 
 export const getUsersByIds = async (
@@ -93,7 +93,7 @@ export const getUsersByIds = async (
           ...data,
           createdAt: timestampToDate(data.createdAt),
           updatedAt: timestampToDate(data.updatedAt),
-        } as User;
+        } as unknown as  User;
       }
     }),
   );
