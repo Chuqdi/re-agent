@@ -86,6 +86,8 @@ export interface Property {
   address: string;
   city: string;
   name: string;
+  status: string;
+  photos: string;
   state: string;
   //coordinates: { lat: number; lng: number };
   
@@ -186,6 +188,10 @@ export interface IProperty {
   createdAt: string;
   updatedAt: string;
   type: string;
+  photos: string;
+  status: string;
+ oropertyID?: string;
+
 }
 
 export interface IContact {

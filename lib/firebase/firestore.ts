@@ -458,6 +458,29 @@ export const createNewRequest = async (
   }
 };
 
+
+export const createNewProperty = async (
+  propertyData: any, //maybe this shouldnt be any - apr 12 2026 dagogo 
+  userId: string, //we will use it later
+) => {
+  try {
+    const docRef = doc(collection(db, COLLECTIONS.PROPERTIES));
+
+    await setDoc(docRef, {
+      ...propertyData,
+      
+      propertyID: docRef.id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    return docRef.id;
+  } catch (error) {
+    console.error("Error creating property:", error);
+    throw error;
+  }
+};
+
 export const updateCurrentRequest = async (
   requestID: string,
   propertyData: Omit<IRequest, "id" | "userId" | "createdAt" | "updatedAt">,
@@ -478,6 +501,31 @@ export const updateCurrentRequest = async (
     throw error;
   }
 };
+
+
+
+export const updateCurrentProperty = async (
+  requestID: string,
+  propertyData:any, //apr 12 - maybe this shouldnt be any "Dagogo"
+  userId: string,
+) => {
+  try {
+    const docRef = doc(db, COLLECTIONS.PROPERTIES, propertyData.propertyID);
+
+    await updateDoc(docRef, {
+      ...propertyData,
+      
+      updatedAt: new Date().toISOString(), // ✅ only update this
+    });
+
+    return requestID;
+  } catch (error) {
+    console.error("Error updating request:", error);
+    throw error;
+  }
+};
+
+
 
 export const getAllRequests: () => Promise<IRequest[]> = async () => {
   try {
@@ -728,6 +776,16 @@ export const getShowingByID = async (showingID: string) => {
 
 export const getRequestByID = async (requestID: string) => {
   const ref = doc(db, COLLECTIONS.REQUESTS, requestID);
+  const snapshot = await getDoc(ref);
+
+  if (!snapshot.exists()) return null;
+
+  return snapshot.data();
+};
+
+
+export const getPropertyByID = async (propertyID: string) => {
+  const ref = doc(db, COLLECTIONS.PROPERTIES, propertyID);
   const snapshot = await getDoc(ref);
 
   if (!snapshot.exists()) return null;
