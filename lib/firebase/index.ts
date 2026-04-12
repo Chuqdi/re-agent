@@ -5,7 +5,8 @@ export const COLLECTIONS ={
     "CONTACTS":'contacts',
     "SHOWINGS":'showings',
     "INVOICES":"invoices",
-    "USERS":"users"
+    "USERS":"users",
+    "PROPERTIES":"properties"
 
 
 }

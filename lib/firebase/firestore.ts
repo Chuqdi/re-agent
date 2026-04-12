@@ -26,6 +26,8 @@ import {
   IShowing,
   IInvoice,
   IUser,
+  IProperty,
+  Property,
 } from "../../types";
 import { COLLECTIONS } from ".";
 
@@ -229,6 +231,9 @@ export const getListingsByAgent = async (
 
 // Showings Collection
 export const showingsCollection = collection(db, "showings");
+
+// Showings Collection
+export const propertiesCollection = collection(db, "properties");
 
 export const createShowing = async (
   showingData: Omit<Showing, "id" | "createdAt" | "updatedAt">,
@@ -602,6 +607,10 @@ export const createNewShowing = async (
 ) => {
   try {
     const docRef = doc(collection(db, COLLECTIONS.SHOWINGS));
+    const propertyDocRef = doc(db, COLLECTIONS.PROPERTIES, propertyData.propertyID);
+    
+    console.log("SHOWING IS STILL WORKING AT THIS POINT 1");
+
 
     await setDoc(docRef, {
       ...propertyData,
@@ -609,6 +618,18 @@ export const createNewShowing = async (
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
+
+
+//update the property with a showind id
+
+await updateDoc(propertyDocRef, {
+  showings: arrayUnion(docRef.id),
+});
+
+
+
+
+    console.log("SHOWING IS STILL WORKING AT THIS POINT 2");
 
     return docRef.id;
   } catch (error) {
@@ -640,6 +661,61 @@ export const getAllShowings: (
     throw error;
   }
 };
+
+//export const getAllProperties: (
+//) => Promise<IProperty[]> = async () => {
+//  try {
+//    // const q = query(collection(db, COLLECTIONS.SHOWINGS));
+//    const q = query(
+//      collection(db, COLLECTIONS.PROPERTIES),
+//      orderBy("createdAt"),
+//    );
+//
+//    const querySnapshot = await getDocs(q);
+//    const properties = querySnapshot.docs.map((doc) => ({
+//      id: doc.id,
+//      ...doc.data(),
+//    }))as unknown as IProperty[];
+//
+//     
+//
+//    return properties;
+//  } catch (error) {
+//    console.error("Error fetching showings:", error);
+//    throw error;
+//  }
+//};
+
+
+
+export const getAllProperties = async (): Promise<Property[]> => {
+  const snapshot = await getDocs(propertiesCollection);
+
+  if (snapshot.empty) return [];
+
+  return snapshot.docs.map((docSnap) => {
+    const data = docSnap.data();
+
+    return {
+      id: docSnap.id, // include id if your Showing type expects it
+      ...data,
+
+      // startTime: timestampToDate(data.startTime),
+      // endTime: timestampToDate(data.endTime),
+      // checkInTime: data.checkInTime
+      //   ? timestampToDate(data.checkInTime)
+      //   : undefined,
+      // checkOutTime: data.checkOutTime
+      //   ? timestampToDate(data.checkOutTime)
+      //   : undefined,
+      // createdAt: timestampToDate(data.createdAt),
+      // updatedAt: timestampToDate(data.updatedAt),
+    } as unknown as Property;
+  });
+};
+
+
+
 
 export const getShowingByID = async (showingID: string) => {
   const ref = doc(db, COLLECTIONS.SHOWINGS, showingID);
