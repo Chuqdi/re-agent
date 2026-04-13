@@ -158,6 +158,16 @@ export interface IUser {
   updatedAt: Timestamp;
 }
 
+
+export interface IInvitedUser {
+  uid: string;
+ invitedUsersId:string;
+ email: string;
+ showingID:string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
 export interface IShowing {
   id: string;
   showingID: string;

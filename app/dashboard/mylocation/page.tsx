@@ -14,8 +14,8 @@ import {
   useLoadScript,
 } from "@react-google-maps/api";
 import { getShowing } from "@/lib/firebase/firestore";
-import { getAllUsers,getAllRequests,getShowingByID } from "@/lib/firebase/firestore";
-import { IRequest,IUser, Showing } from "@/types";
+import { getAllUsers,getAllInvitedUsers,getAllRequests,getShowingByID } from "@/lib/firebase/firestore";
+import { IInvitedUser, IRequest,IUser, Showing } from "@/types";
 import { useGeoLocation } from "@/lib/contexts/GeoLocationContext";
 import { mapContainerStyle, mapLineStyleOptions } from "@/lib/utils";
 import { Link, Plus, Search } from "lucide-react";
@@ -55,12 +55,16 @@ const tableCellClassname =
 function MyLocationContent() {
   const searchParams = useSearchParams();
   const search = useSearchParams();
+  const dataGeneral = search.get("data") as any;
+  const parsedGeneral = JSON.parse(dataGeneral) as any; //used to be as IRequest
+
+
   const { location, error: locationError } = useGeoLocation();
 
-  const [users, setUsers] = useState<IUser[]>();
+  const [users, setUsers] = useState<IInvitedUser[]>();
 
   useEffect(() => {
-    getAllUsers().then((r) => {
+    getAllInvitedUsers().then((r) => {
       console.log(r)
       setUsers(r);
     });
@@ -196,7 +200,7 @@ useEffect(() => {
             <table className="card-elevated min-w-[760px] w-full border-separate border-spacing-0 text-[11px] text-gray-500">
               <thead>
                 <tr>
-                  {["Name", "Display Name", "Email", "Date added", "Distance From Showing"].map(
+                  {[/*"Name", "Display Name",*/ "Email", "Date added", "Distance From Showing"].map(
                     (header) => (
                       <th
                         key={header}
@@ -212,8 +216,10 @@ useEffect(() => {
               <tbody>
               {users
             ?.filter((item) => {
-              if (!selectedRequests?.invitees) return true;
-              return !selectedRequests.invitees.includes(item.email);
+              //if (!selectedRequests?.invitees) return true;
+              //return !selectedRequests.invitees.includes(item.email);
+
+              item.showingID === (parsedGeneral && parsedGeneral.showingID)
             })
             .map((item) => {
 
@@ -226,24 +232,24 @@ useEffect(() => {
                   
                    //{ latitude:selectedRequests?.coordinates?.lng , longitude: selectedRequests?.coordinates?.lng },
                    { latitude:selectedRequests && selectedRequests.coordinates?selectedRequests.coordinates.lat:myLocation.latitude , longitude:selectedRequests && selectedRequests.coordinates?selectedRequests.coordinates.lng:myLocation.longitude },
-                   { latitude: item.address_coordinates ? item.address_coordinates.lat:myLocation.latitude, longitude: item.address_coordinates ? item.address_coordinates.lng:myLocation.longitude }
+                   { latitude: /*item.address_coordinates ? item.address_coordinates.lat:*/myLocation.latitude, longitude: /*item.address_coordinates ? item.address_coordinates.lng:*/myLocation.longitude }
                  );
               return(
                 <tr key={`${item?.uid}`} className="group hover:bg-gray-50">
-                  <td className={tableCellClassname}>
+                  {/*<td className={tableCellClassname}>
                     <span className="truncate text-[12px] text-black">
                       {item?.fullName}
                     </span>
-                  </td>
+                  </td>*/}
 
-                  <td className={tableCellClassname}>
+                  {/*<td className={tableCellClassname}>
                     <div className="flex min-w-0 items-center gap-2">
                      
                       <span className="truncate text-[12px] text-black capitalize">
                         {item?.displayName}
                       </span>
                     </div>
-                  </td>
+                </td>*/}
 
                   <td className={tableCellClassname}>
                     <span className="truncate text-[12px] text-black">
@@ -290,10 +296,10 @@ useEffect(() => {
 
 
  function UsersContent() {
-  const [users, setUsers] = useState<IUser[]>();
+  const [users, setUsers] = useState<IInvitedUser[]>();
  
   useEffect(() => {
-    getAllUsers().then((r) => {
+    getAllInvitedUsers().then((r) => {
       console.log(r)
       setUsers(r);
     });
@@ -344,12 +350,15 @@ useEffect(() => {
               <tbody>
                 {users?.map((item) => (
                   <tr key={`${item?.uid}`} className="group hover:bg-gray-50">
+                    {/*
                     <td className={tableCellClassname}>
                       <span className="truncate text-[12px] text-black">
                         {item?.fullName}
                       </span>
                     </td>
+                   */}
 
+                  {/*
                   <td className={tableCellClassname}>
                     <div className="flex min-w-0 items-center gap-2">
                      
@@ -358,6 +367,7 @@ useEffect(() => {
                       </span>
                     </div>
                   </td>
+                  */}
 
                   <td className={tableCellClassname}>
                     <span className="truncate text-[12px] text-black">
@@ -371,6 +381,7 @@ useEffect(() => {
                     </span>
                   </td>
 
+                   {/*
                     <td className={tableCellClassname}>
                       <span
                         className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
@@ -380,6 +391,7 @@ useEffect(() => {
                         { item.address_coordinates? `${item.address_coordinates.lat} , ${item.address_coordinates.lng}`  :" "}
                       </span>
                     </td>
+                      */}
                   </tr>
                 ))}
               </tbody>

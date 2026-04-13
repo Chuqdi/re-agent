@@ -2,12 +2,13 @@
 
 import { AppShell } from "@/components/layout/AppShell";
 import {
+  getAllInvitedUsers,
   getShowings,
   getUsersByEmails,
   updateShowingInvitees,
 } from "@/lib/firebase/firestore";
 import moment from "moment";
-import { Showing, User } from "@/types";
+import { IInvitedUser, Showing, User } from "@/types";
 import { useEffect, useMemo, useState } from "react";
 import {
   GoogleMap,
@@ -63,16 +64,16 @@ const ListShowingInvitees = ({
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
-  const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<IInvitedUser[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<IInvitedUser[]>([]);
   const [searchValue] = useDebounce(searchText, 1000);
 
   useEffect(() => {
-    getUsersByEmails(invitees)
+    getAllInvitedUsers(/*invitees*/)
       .then((data) => {
         setUsers(data);
         console.log("hERE");
-        console.log(data?.[0]?.address_coordinates);
+        //console.log(data?.[0]?.address_coordinates);
       })
       .finally(() => setIsLoading(false));
   }, []);
@@ -87,7 +88,7 @@ const ListShowingInvitees = ({
 
     const filtered = users.filter(
       (user) =>
-        user?.fullName?.toLowerCase().includes(lowerCaseSearch) ||
+       // user?.fullName?.toLowerCase().includes(lowerCaseSearch) ||
         user?.email?.toLowerCase().includes(lowerCaseSearch),
     );
 
@@ -117,8 +118,8 @@ const ListShowingInvitees = ({
         <thead>
           <tr>
             {[
-              "Name",
-              "Display Name",
+              /*"Name",
+              "Display Name",*/
               "Email",
               "Date added",
               "Distance from showing",
@@ -139,17 +140,17 @@ const ListShowingInvitees = ({
               key={`${user?.email}_${index}`}
               className="group hover:bg-gray-50"
             >
-              <td className="px-4 py-2.5 border-b border-gray-200 group-last:border-b-0">
+              {/*<td className="px-4 py-2.5 border-b border-gray-200 group-last:border-b-0">
                 <span className="truncate text-[12px] text-black">
                   {user?.fullName}
                 </span>
-              </td>
+          </td>*/}
 
-              <td className="px-4 py-2.5 border-b border-gray-200 group-last:border-b-0">
+              {/*<td className="px-4 py-2.5 border-b border-gray-200 group-last:border-b-0">
                 <span className="truncate text-[12px] text-black">
                   {user?.displayName}
                 </span>
-              </td>
+              </td>*/}
 
               <td className="px-4 py-2.5 border-b border-gray-200 group-last:border-b-0">
                 <span className="truncate text-[12px] text-black">
@@ -165,11 +166,11 @@ const ListShowingInvitees = ({
 
               <td className="px-4 py-2.5 border-b border-gray-200 group-last:border-b-0">
                 <span className="truncate border border-blue-200 p-2 bg-blue-100 rounded-full text-[12px] text-black">
-                  {user.address_coordinates &&
+                  {/*user.address_coordinates &&*/
                     showingCoords &&
                     getDistanceInKm(
-                      Number(user.address_coordinates.lat),
-                      Number(user.address_coordinates.lng),
+                      Number(6.34 /*user.address_coordinates.lat*/),
+                      Number(4.08 /*user.address_coordinates.lng*/),
                       Number(showingCoords?.lat),
                       Number(showingCoords?.lng),
                     ).toFixed(2)+'KM'}

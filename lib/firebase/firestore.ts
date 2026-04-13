@@ -26,6 +26,7 @@ import {
   IShowing,
   IInvoice,
   IUser,
+  IInvitedUser,
   IProperty,
   Property,
 } from "../../types";
@@ -567,6 +568,28 @@ export const getAllUsers: () => Promise<IUser[]> = async () => {
   }
 };
 
+
+export const getAllInvitedUsers: () => Promise<IInvitedUser[]> = async () => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.INVITEDUSERS),
+      orderBy("createdAt", "desc"),
+    );
+
+    const querySnapshot = await getDocs(q);
+    const thoseInvited = querySnapshot.docs.map((doc) => ({
+      uid: doc.id,
+      ...doc.data(),
+    })) as IInvitedUser[];
+
+    return thoseInvited;
+  } catch (error) {
+    console.error("Error fetching thoseInvited:", error);
+    throw error;
+  }
+};
+
+
 export const createNewContact = async (
   contactData: Omit<IContact, "id" | "userId" | "createdAt" | "updatedAt">,
   userId: string,
@@ -804,6 +827,31 @@ export const updateShowingInvitees = async (
       invitees: arrayUnion(newEmail),
       updatedAt: new Date().toISOString(),
     });
+
+    //const invitedUsersRef = doc(db, COLLECTIONS.INVITEDUSERS);
+      const invitedUsersRef = doc(collection(db, COLLECTIONS.INVITEDUSERS));
+
+    //ADD TO INVITED USERS COLLECTION - START
+   
+
+    await setDoc(invitedUsersRef, {
+      uid:invitedUsersRef.id,
+      invitedUsersId:invitedUsersRef.id,
+      email:newEmail,
+      showingID:showingID,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+     
+
+
+    //ADD TO INVITED USERS COLLECTION  -END 
+
+
+    
+
+
+    
 
     return true;
   } catch (error) {
