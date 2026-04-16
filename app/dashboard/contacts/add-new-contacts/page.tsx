@@ -60,7 +60,7 @@ function AddNewContact() {
                   Add New Contact
                 </h1>
                 <p className="mt-1 text-xs text-gray-500">
-                  Specify showing details to add
+                  Specify contact details to add
                 </p>
               </div>
               <div className="flex items-center gap-4">

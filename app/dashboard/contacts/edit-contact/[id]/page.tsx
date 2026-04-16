@@ -83,7 +83,7 @@ function EditContactPage({ params }: { params: { id: string } }) {
                     Edit Contact
                   </h1>
                   <p className="mt-1 text-xs text-gray-500">
-                    Specify showing details to add
+                    Specify contact details to edit
                   </p>
                 </div>
                 <div className="flex items-center gap-4">

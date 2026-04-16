@@ -26,6 +26,9 @@ import {
   IShowing,
   IInvoice,
   IUser,
+  IInvitedUser,
+  IProperty,
+  Property,
 } from "../../types";
 import { COLLECTIONS } from ".";
 
@@ -73,7 +76,7 @@ export const getUser = async (uid: string): Promise<User | null> => {
     ...data,
     createdAt: timestampToDate(data.createdAt),
     updatedAt: timestampToDate(data.updatedAt),
-  } as User;
+  } as unknown as User;
 };
 
 export const getUsersByIds = async (
@@ -93,7 +96,7 @@ export const getUsersByIds = async (
           ...data,
           createdAt: timestampToDate(data.createdAt),
           updatedAt: timestampToDate(data.updatedAt),
-        } as User;
+        } as unknown as User;
       }
     }),
   );
@@ -230,6 +233,9 @@ export const getListingsByAgent = async (
 // Showings Collection
 export const showingsCollection = collection(db, "showings");
 
+// Showings Collection
+export const propertiesCollection = collection(db, "properties");
+
 export const createShowing = async (
   showingData: Omit<Showing, "id" | "createdAt" | "updatedAt">,
 ): Promise<string> => {
@@ -244,10 +250,7 @@ export const createShowing = async (
   return showingId;
 };
 
-
-export async function getUsersByEmails(
-  emails: string[]
-): Promise<User[]> {
+export async function getUsersByEmails(emails: string[]): Promise<User[]> {
   if (!emails.length) return [];
 
   try {
@@ -269,7 +272,6 @@ export async function getUsersByEmails(
     return [];
   }
 }
-
 
 export const getShowings = async (): Promise<Showing[]> => {
   const snapshot = await getDocs(showingsCollection);
@@ -453,6 +455,28 @@ export const createNewRequest = async (
   }
 };
 
+export const createNewProperty = async (
+  propertyData: any, //maybe this shouldnt be any - apr 12 2026 dagogo
+  userId: string, //we will use it later
+) => {
+  try {
+    const docRef = doc(collection(db, COLLECTIONS.PROPERTIES));
+
+    await setDoc(docRef, {
+      ...propertyData,
+
+      propertyID: docRef.id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    return docRef.id;
+  } catch (error) {
+    console.error("Error creating property:", error);
+    throw error;
+  }
+};
+
 export const updateCurrentRequest = async (
   requestID: string,
   propertyData: Omit<IRequest, "id" | "userId" | "createdAt" | "updatedAt">,
@@ -464,6 +488,27 @@ export const updateCurrentRequest = async (
     await updateDoc(docRef, {
       ...propertyData,
       userId,
+      updatedAt: new Date().toISOString(), // ✅ only update this
+    });
+
+    return requestID;
+  } catch (error) {
+    console.error("Error updating request:", error);
+    throw error;
+  }
+};
+
+export const updateCurrentProperty = async (
+  requestID: string,
+  propertyData: any, //apr 12 - maybe this shouldnt be any "Dagogo"
+  userId: string,
+) => {
+  try {
+    const docRef = doc(db, COLLECTIONS.PROPERTIES, propertyData.propertyID);
+
+    await updateDoc(docRef, {
+      ...propertyData,
+
       updatedAt: new Date().toISOString(), // ✅ only update this
     });
 
@@ -510,6 +555,26 @@ export const getAllUsers: () => Promise<IUser[]> = async () => {
     return requests;
   } catch (error) {
     console.error("Error fetching requests:", error);
+    throw error;
+  }
+};
+
+export const getAllInvitedUsers: () => Promise<User[]> = async () => {
+  try {
+    const q = query(
+      collection(db, COLLECTIONS.INVITEDUSERS),
+      orderBy("createdAt", "desc"),
+    );
+
+    const querySnapshot = await getDocs(q);
+    const thoseInvited = querySnapshot.docs.map((doc) => ({
+      uid: doc.id,
+      ...doc.data(),
+    })) as User[];
+
+    return thoseInvited;
+  } catch (error) {
+    console.error("Error fetching thoseInvited:", error);
     throw error;
   }
 };
@@ -602,6 +667,13 @@ export const createNewShowing = async (
 ) => {
   try {
     const docRef = doc(collection(db, COLLECTIONS.SHOWINGS));
+    const propertyDocRef = doc(
+      db,
+      COLLECTIONS.PROPERTIES,
+      propertyData.propertyID,
+    );
+
+    console.log("SHOWING IS STILL WORKING AT THIS POINT 1");
 
     await setDoc(docRef, {
       ...propertyData,
@@ -610,6 +682,14 @@ export const createNewShowing = async (
       updatedAt: new Date().toISOString(),
     });
 
+    //update the property with a showind id
+
+    await updateDoc(propertyDocRef, {
+      showings: arrayUnion(docRef.id),
+    });
+
+    console.log("SHOWING IS STILL WORKING AT THIS POINT 2");
+
     return docRef.id;
   } catch (error) {
     console.error("Error creating showing:", error);
@@ -617,28 +697,72 @@ export const createNewShowing = async (
   }
 };
 
-export const getAllShowings: (
-) => Promise<IShowing[]> = async () => {
+export const getAllShowings: () => Promise<IShowing[]> = async () => {
   try {
     // const q = query(collection(db, COLLECTIONS.SHOWINGS));
-    const q = query(
-      collection(db, COLLECTIONS.SHOWINGS),
-      orderBy("createdAt"),
-    );
+    const q = query(collection(db, COLLECTIONS.SHOWINGS), orderBy("createdAt"));
 
     const querySnapshot = await getDocs(q);
     const showings = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-    }))as IShowing[];
-
-     
+    })) as IShowing[];
 
     return showings;
   } catch (error) {
     console.error("Error fetching showings:", error);
     throw error;
   }
+};
+
+//export const getAllProperties: (
+//) => Promise<IProperty[]> = async () => {
+//  try {
+//    // const q = query(collection(db, COLLECTIONS.SHOWINGS));
+//    const q = query(
+//      collection(db, COLLECTIONS.PROPERTIES),
+//      orderBy("createdAt"),
+//    );
+//
+//    const querySnapshot = await getDocs(q);
+//    const properties = querySnapshot.docs.map((doc) => ({
+//      id: doc.id,
+//      ...doc.data(),
+//    }))as unknown as IProperty[];
+//
+//
+//
+//    return properties;
+//  } catch (error) {
+//    console.error("Error fetching showings:", error);
+//    throw error;
+//  }
+//};
+
+export const getAllProperties = async (): Promise<Property[]> => {
+  const snapshot = await getDocs(propertiesCollection);
+
+  if (snapshot.empty) return [];
+
+  return snapshot.docs.map((docSnap) => {
+    const data = docSnap.data();
+
+    return {
+      id: docSnap.id, // include id if your Showing type expects it
+      ...data,
+
+      // startTime: timestampToDate(data.startTime),
+      // endTime: timestampToDate(data.endTime),
+      // checkInTime: data.checkInTime
+      //   ? timestampToDate(data.checkInTime)
+      //   : undefined,
+      // checkOutTime: data.checkOutTime
+      //   ? timestampToDate(data.checkOutTime)
+      //   : undefined,
+      // createdAt: timestampToDate(data.createdAt),
+      // updatedAt: timestampToDate(data.updatedAt),
+    } as unknown as Property;
+  });
 };
 
 export const getShowingByID = async (showingID: string) => {
@@ -659,6 +783,15 @@ export const getRequestByID = async (requestID: string) => {
   return snapshot.data();
 };
 
+export const getPropertyByID = async (propertyID: string) => {
+  const ref = doc(db, COLLECTIONS.PROPERTIES, propertyID);
+  const snapshot = await getDoc(ref);
+
+  if (!snapshot.exists()) return null;
+
+  return snapshot.data();
+};
+
 export const updateShowingInvitees = async (
   showingID: string,
   newEmail: string,
@@ -670,6 +803,22 @@ export const updateShowingInvitees = async (
       invitees: arrayUnion(newEmail),
       updatedAt: new Date().toISOString(),
     });
+
+    //const invitedUsersRef = doc(db, COLLECTIONS.INVITEDUSERS);
+    const invitedUsersRef = doc(collection(db, COLLECTIONS.INVITEDUSERS));
+
+    //ADD TO INVITED USERS COLLECTION - START
+
+    await setDoc(invitedUsersRef, {
+      uid: invitedUsersRef.id,
+      invitedUsersId: invitedUsersRef.id,
+      email: newEmail,
+      showingID: showingID,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    //ADD TO INVITED USERS COLLECTION  -END
 
     return true;
   } catch (error) {

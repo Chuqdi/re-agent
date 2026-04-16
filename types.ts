@@ -52,6 +52,7 @@ export interface Listing {
 export interface Showing {
   id: string;
   showingID: string;
+  propertyID: string;
   agentId: string;
   invitees:string[];
   address: string;
@@ -75,6 +76,25 @@ export interface Showing {
   checkOutTime?: Date;
   createdAt: Date;
   updatedAt: Date;
+}
+
+
+
+export interface Property {
+  propertyID: string;
+ 
+  address: string;
+  city: string;
+  name: string;
+  status: string;
+  photos: string;
+  state: string;
+  //coordinates: { lat: number; lng: number };
+  
+  showings: string[];
+  createdAt: string;
+  updatedAt: string;
+  type: string;
 }
 
 export interface Document {
@@ -138,18 +158,50 @@ export interface IUser {
   updatedAt: Timestamp;
 }
 
+
+export interface IInvitedUser {
+  uid: string;
+ invitedUsersId:string;
+ email: string;
+ showingID:string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
 export interface IShowing {
   id: string;
   showingID: string;
+  propertyID: string;
   address: string;
   city: string;
   state: string;
   coordinates: { lat: number; lng: number };
   showingTime: string;
   invitee: string;
-  invitees: string[];
   createdAt: string;
   updatedAt: string;
+  invitees?: string[];
+}
+
+
+
+export interface IProperty {
+  propertyID: string;
+ 
+  address: string;
+  city: string;
+  name: string;
+  state: string;
+  //coordinates: { lat: number; lng: number };
+  
+  showings: string[];
+  createdAt: string;
+  updatedAt: string;
+  type: string;
+  photos: string;
+  status: string;
+ oropertyID?: string;
+
 }
 
 export interface IContact {
