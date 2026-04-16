@@ -174,7 +174,7 @@ export function IPLocationProvider({
   );
 }
 
-export function useGeoLocation() {
+export function useGeoLocationContext() {
   const ctx = useContext(GeoLocationContext);
   if (!ctx) throw new Error("useIPLocation must be used within IPLocationProvider");
   return ctx;

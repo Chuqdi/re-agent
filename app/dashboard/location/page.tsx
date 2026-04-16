@@ -15,8 +15,10 @@ import {
   Marker,
   Polyline,
 } from "@react-google-maps/api";
-import { useGeoLocation } from "@/lib/contexts/GeoLocationContext";
+import { useGeoLocationContext } from "@/lib/contexts/GeoLocationContext";
 import {
+  calculateMatrixDistance,
+  formatDuration,
   formatFirestoreDate,
   getDistanceInKm,
   mapContainerStyle,
@@ -53,6 +55,68 @@ const demoAgents: LocationAgent[] = [
     showingId: "s2",
   },
 ];
+
+const SingleInviteUserTableRow = ({
+  user,
+  showingCoords,
+}: {
+  user: User;
+  showingCoords: {
+    lat: number;
+    lng: number;
+  };
+}) => {
+  const locationResult = calculateMatrixDistance(
+    Number(showingCoords.lat),
+    Number(showingCoords.lng), // Lagos
+    Number(user.address_coordinates.lat),
+    Number(user.address_coordinates.lng), // Port Harcourt
+  );
+  return (
+    <tr className="group hover:bg-gray-50">
+      <td className="px-4 py-2.5 border-b border-gray-200 group-last:border-b-0">
+        <span className="truncate text-[12px] text-black">
+          {user?.fullName}
+        </span>
+      </td>
+
+      <td className="px-4 py-2.5 border-b border-gray-200 group-last:border-b-0">
+        <span className="truncate text-[12px] text-black">
+          {user?.displayName}
+        </span>
+      </td>
+
+      <td className="px-4 py-2.5 border-b border-gray-200 group-last:border-b-0">
+        <span className="truncate text-[12px] text-black">{user?.email}</span>
+      </td>
+
+      <td className="px-4 py-2.5 border-b border-gray-200 group-last:border-b-0">
+        <span className="truncate text-[12px] text-black">
+          {user?.createdAt && formatFirestoreDate(user.createdAt)}
+        </span>
+      </td>
+
+      <td className="px-4 py-2.5 border-b border-gray-200 group-last:border-b-0">
+        <span className="truncate border border-blue-200 p-2 bg-blue-100 rounded-full text-[12px] text-black">
+          {user.address_coordinates &&
+            showingCoords &&
+            getDistanceInKm(
+              Number(user.address_coordinates.lat),
+              Number(user.address_coordinates.lng),
+              Number(showingCoords?.lat),
+              Number(showingCoords?.lng),
+            ).toFixed(2) + "KM"}
+        </span>
+      </td>
+
+      <td className="px-4 py-2.5 border-b border-gray-200 group-last:border-b-0">
+        <span className="truncate border border-blue-100 p-2 bg-blue-50 rounded-full text-[12px] text-black">
+          {formatDuration(locationResult.duration)}
+        </span>
+      </td>
+    </tr>
+  );
+};
 
 const ListShowingInvitees = ({
   showingCoords,
@@ -122,6 +186,7 @@ const ListShowingInvitees = ({
               "Email",
               "Date added",
               "Distance from showing",
+              "Est. Time to showing",
             ].map((header) => (
               <th
                 key={header}
@@ -135,47 +200,11 @@ const ListShowingInvitees = ({
 
         <tbody>
           {filteredUsers?.map((user, index) => (
-            <tr
+            <SingleInviteUserTableRow
+              user={user}
+              showingCoords={showingCoords}
               key={`${user?.email}_${index}`}
-              className="group hover:bg-gray-50"
-            >
-              <td className="px-4 py-2.5 border-b border-gray-200 group-last:border-b-0">
-                <span className="truncate text-[12px] text-black">
-                  {user?.fullName}
-                </span>
-              </td>
-
-              <td className="px-4 py-2.5 border-b border-gray-200 group-last:border-b-0">
-                <span className="truncate text-[12px] text-black">
-                  {user?.displayName}
-                </span>
-              </td>
-
-              <td className="px-4 py-2.5 border-b border-gray-200 group-last:border-b-0">
-                <span className="truncate text-[12px] text-black">
-                  {user?.email}
-                </span>
-              </td>
-
-              <td className="px-4 py-2.5 border-b border-gray-200 group-last:border-b-0">
-                <span className="truncate text-[12px] text-black">
-                  {user?.createdAt && formatFirestoreDate(user.createdAt)}
-                </span>
-              </td>
-
-              <td className="px-4 py-2.5 border-b border-gray-200 group-last:border-b-0">
-                <span className="truncate border border-blue-200 p-2 bg-blue-100 rounded-full text-[12px] text-black">
-                  {user.address_coordinates &&
-                    showingCoords &&
-                    getDistanceInKm(
-                      Number(user.address_coordinates.lat),
-                      Number(user.address_coordinates.lng),
-                      Number(showingCoords?.lat),
-                      Number(showingCoords?.lng),
-                    ).toFixed(2)+'KM'}
-                </span>
-              </td>
-            </tr>
+            />
           ))}
         </tbody>
       </table>
@@ -183,12 +212,14 @@ const ListShowingInvitees = ({
   );
 };
 export default function LocationPage() {
-  const { location, error: locationError } = useGeoLocation();
+  const { location, error: locationError } = useGeoLocationContext();
   const [requests, setRequests] = useState<Showing[]>(); //march 31st 2026  -will change variable later
   const [selectedRequestID, setSelectedRequestID] = useState<string>();
 
   const [filter, setFilter] = useState<string>("all");
   const [inviteEmail, setInviteEmail] = useState("");
+  const [agentEstimatedTimeToShowing, setAgentEstimatedTimeToShowing] =
+    useState("");
   const [allShowings, setAllShowings] = useState<Showing[]>([]);
   const hasMapsKey = !!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -218,27 +249,6 @@ export default function LocationPage() {
       setRequests(r);
     });
   }, []);
-
-  useEffect(() => {
-    if (!allShowings || !selectedRequestID) return;
-
-    const found = allShowings.find((r) => r?.showingID === selectedRequestID);
-    setSelectedRequest(found);
-  }, [allShowings, selectedRequestID]);
-
-  useEffect(() => {
-    const loadShowings = async () => {
-      try {
-        const showings = await getShowings();
-        setAllShowings(showings);
-      } catch (error) {
-        console.error("Error loading showings:", error);
-      }
-    };
-    loadShowings();
-  }, []);
-
-  console.log(selectedRequest);
 
   const emailHTML = `
       <p> <strong>Hello, </strong>,</p>
@@ -282,24 +292,6 @@ export default function LocationPage() {
     </p>
     
     `;
-
-  //const handleInvite = () => {
-  //  if (!selectedRequest) {
-  //    window.alert("Please select a showing first!");
-  //    return;
-  //  }
-  //  if (selectedRequest?.coordinates) {
-  //    const url = `/dashboard/mylocation?data=${encodeURIComponent(
-  //      JSON.stringify(selectedRequest),
-  //    )}`;
-  //
-  //    window.open(url, "_blank");
-  //  }
-  //  setInviteEmail("");
-  //
-  //
-  //
-  //};
 
   const handleInvite = async () => {
     if (!selectedRequest) {
@@ -357,6 +349,37 @@ export default function LocationPage() {
         : demoAgents.filter((agent) => agent.showingId === filter),
     [filter],
   );
+
+  useEffect(() => {
+    if (selectedRequest?.id && location?.lat) {
+      const result = calculateMatrixDistance(
+        Number(selectedRequest.coordinates.lat),
+        Number(selectedRequest.coordinates.lng),
+        Number(location.lat),
+        Number(location.lng),
+      );
+      setAgentEstimatedTimeToShowing(formatDuration(result.duration));
+    }
+  }, [selectedRequest, location]);
+
+  useEffect(() => {
+    if (!allShowings || !selectedRequestID) return;
+
+    const found = allShowings.find((r) => r?.showingID === selectedRequestID);
+    setSelectedRequest(found);
+  }, [allShowings, selectedRequestID]);
+
+  useEffect(() => {
+    const loadShowings = async () => {
+      try {
+        const showings = await getShowings();
+        setAllShowings(showings);
+      } catch (error) {
+        console.error("Error loading showings:", error);
+      }
+    };
+    loadShowings();
+  }, []);
 
   if (!isLoaded) {
     return (
@@ -436,31 +459,44 @@ export default function LocationPage() {
           {/* Filters */}
           <div className="mb-3 flex items-center justify-between gap-3 text-xs text-gray-600">
             {!!allShowings?.length && (
-              <div className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-2 py-1">
-                <span className="text-[11px] text-gray-500">Showing</span>
-                <select
-                  value={selectedRequestID}
-                  onChange={(e) => {
-                    console.log("WHAT IS E.TARGET.VALUE--->", e.target.value);
-                    setSelectedRequestID(
-                      e.target.value && e.target.value,
-                    ); /*setSelectedRequest(e.target.value)*/
-                  }}
-                  className="bg-white text-xs text-black focus:outline-none"
-                >
-                  <option value="">— select —</option>
-                  {allShowings?.map((showing) => (
-                    <option key={showing?.showingID} value={showing?.showingID}>
-                      {showing?.address}
-                    </option>
-                  ))}
-                </select>
+              <div className="flex flex-col gap-2">
+                {!!agentEstimatedTimeToShowing?.length && (
+                  <p className="font-bold text-black">
+                    {agentEstimatedTimeToShowing} away from showing
+                  </p>
+                )}
+                <div className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-2 py-1">
+                  <span className="text-[11px] text-gray-500">Showing</span>
+                  <select
+                    value={selectedRequestID}
+                    onChange={(e) => {
+                      console.log("WHAT IS E.TARGET.VALUE--->", e.target.value);
+                      setSelectedRequestID(
+                        e.target.value && e.target.value,
+                      ); /*setSelectedRequest(e.target.value)*/
+                    }}
+                    className="bg-white text-xs text-black focus:outline-none"
+                  >
+                    <option value="">— select —</option>
+                    {allShowings?.map((showing) => (
+                      <option
+                        key={showing?.showingID}
+                        value={showing?.showingID}
+                      >
+                        {showing?.address}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             )}
-            <span className="text-[11px] text-gray-500">
-              {filteredAgents.length} active agent
-              {filteredAgents.length === 1 ? "" : "s"}
-            </span>
+
+            <div>
+              <span className="text-[11px] text-gray-500">
+                {filteredAgents.length} active agent
+                {filteredAgents.length === 1 ? "" : "s"}
+              </span>
+            </div>
           </div>
 
           {/* Map area */}
