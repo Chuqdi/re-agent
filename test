@@ -2,12 +2,13 @@
 
 import { AppShell } from "@/components/layout/AppShell";
 import {
+  getAllInvitedUsers,
   getShowings,
   getUsersByEmails,
   updateShowingInvitees,
 } from "@/lib/firebase/firestore";
 import moment from "moment";
-import { Showing, User } from "@/types";
+import { IInvitedUser, Showing, User } from "@/types";
 import { useEffect, useMemo, useState } from "react";
 import {
   GoogleMap,
@@ -69,9 +70,12 @@ const SingleInviteUserTableRow = ({
   const locationResult = calculateMatrixDistance(
     Number(showingCoords.lat),
     Number(showingCoords.lng), // Lagos
-    Number(user.address_coordinates.lat),
-    Number(user.address_coordinates.lng), // Port Harcourt
+    Number(user.address_coordinates?.lat),
+    Number(user?.address_coordinates?.lng), // Port Harcourt
   );
+
+  console.log(user?.address_coordinates)
+
   return (
     <tr className="group hover:bg-gray-50">
       <td className="px-4 py-2.5 border-b border-gray-200 group-last:border-b-0">
@@ -101,8 +105,8 @@ const SingleInviteUserTableRow = ({
           {user.address_coordinates &&
             showingCoords &&
             getDistanceInKm(
-              Number(user.address_coordinates.lat),
-              Number(user.address_coordinates.lng),
+              Number(user?.address_coordinates?.lat),
+              Number(user?.address_coordinates?.lng),
               Number(showingCoords?.lat),
               Number(showingCoords?.lng),
             ).toFixed(2) + "KM"}
@@ -110,7 +114,9 @@ const SingleInviteUserTableRow = ({
       </td>
 
       <td className="px-4 py-2.5 border-b border-gray-200 group-last:border-b-0">
-        <span  className="truncate border border-blue-200 p-2 bg-blue-100 rounded-full text-[12px] text-black">{formatDuration(locationResult.duration)}</span>
+        <span className="truncate border border-blue-100 p-2 bg-blue-50 rounded-full text-[12px] text-black">
+          {formatDuration(locationResult.duration)}
+        </span>
       </td>
     </tr>
   );
@@ -130,7 +136,7 @@ const ListShowingInvitees = ({
   const [searchValue] = useDebounce(searchText, 1000);
 
   useEffect(() => {
-    getUsersByEmails(invitees)
+    getAllInvitedUsers(/*invitees*/)
       .then((data) => {
         setUsers(data);
       })
@@ -145,10 +151,9 @@ const ListShowingInvitees = ({
 
     const lowerCaseSearch = searchValue.toLowerCase();
 
-    const filtered = users.filter(
-      (user) =>
-        user?.fullName?.toLowerCase().includes(lowerCaseSearch) ||
-        user?.email?.toLowerCase().includes(lowerCaseSearch),
+    const filtered = users.filter((user) =>
+      // user?.fullName?.toLowerCase().includes(lowerCaseSearch) ||
+      user?.email?.toLowerCase().includes(lowerCaseSearch),
     );
 
     setFilteredUsers(filtered);
@@ -177,8 +182,8 @@ const ListShowingInvitees = ({
         <thead>
           <tr>
             {[
-              "Name",
-              "Display Name",
+              /*"Name",
+              "Display Name",*/
               "Email",
               "Date added",
               "Distance from showing",
@@ -303,19 +308,22 @@ export default function LocationPage() {
         inviteEmail,
       );
 
-      const res = await fetch("/api/send-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const res = await fetch(
+        "https://nurturer-sendgrid-backend.vercel.app/send-email",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            to: inviteEmail && inviteEmail,
+            subject: "Your Invitation to Our Showing",
+            htmlMessage: emailHTML,
+            name: "John Test",
+            userEmail: "info@nurturer.ai", //change to re-agents later
+          }),
         },
-        body: JSON.stringify({
-          to: inviteEmail && inviteEmail,
-          subject: "Your Invitation to Our Showing",
-          htmlMessage: emailHTML,
-          name: "John Test",
-          userEmail: "info@reagents.com",
-        }),
-      });
+      );
 
       const result = await res.json();
 

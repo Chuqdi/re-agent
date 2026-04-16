@@ -96,7 +96,7 @@ export const getUsersByIds = async (
           ...data,
           createdAt: timestampToDate(data.createdAt),
           updatedAt: timestampToDate(data.updatedAt),
-        } as unknown as  User;
+        } as unknown as User;
       }
     }),
   );
@@ -250,10 +250,7 @@ export const createShowing = async (
   return showingId;
 };
 
-
-export async function getUsersByEmails(
-  emails: string[]
-): Promise<User[]> {
+export async function getUsersByEmails(emails: string[]): Promise<User[]> {
   if (!emails.length) return [];
 
   try {
@@ -275,7 +272,6 @@ export async function getUsersByEmails(
     return [];
   }
 }
-
 
 export const getShowings = async (): Promise<Showing[]> => {
   const snapshot = await getDocs(showingsCollection);
@@ -459,9 +455,8 @@ export const createNewRequest = async (
   }
 };
 
-
 export const createNewProperty = async (
-  propertyData: any, //maybe this shouldnt be any - apr 12 2026 dagogo 
+  propertyData: any, //maybe this shouldnt be any - apr 12 2026 dagogo
   userId: string, //we will use it later
 ) => {
   try {
@@ -469,7 +464,7 @@ export const createNewProperty = async (
 
     await setDoc(docRef, {
       ...propertyData,
-      
+
       propertyID: docRef.id,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -503,11 +498,9 @@ export const updateCurrentRequest = async (
   }
 };
 
-
-
 export const updateCurrentProperty = async (
   requestID: string,
-  propertyData:any, //apr 12 - maybe this shouldnt be any "Dagogo"
+  propertyData: any, //apr 12 - maybe this shouldnt be any "Dagogo"
   userId: string,
 ) => {
   try {
@@ -515,7 +508,7 @@ export const updateCurrentProperty = async (
 
     await updateDoc(docRef, {
       ...propertyData,
-      
+
       updatedAt: new Date().toISOString(), // ✅ only update this
     });
 
@@ -525,8 +518,6 @@ export const updateCurrentProperty = async (
     throw error;
   }
 };
-
-
 
 export const getAllRequests: () => Promise<IRequest[]> = async () => {
   try {
@@ -568,8 +559,7 @@ export const getAllUsers: () => Promise<IUser[]> = async () => {
   }
 };
 
-
-export const getAllInvitedUsers: () => Promise<IInvitedUser[]> = async () => {
+export const getAllInvitedUsers: () => Promise<User[]> = async () => {
   try {
     const q = query(
       collection(db, COLLECTIONS.INVITEDUSERS),
@@ -580,7 +570,7 @@ export const getAllInvitedUsers: () => Promise<IInvitedUser[]> = async () => {
     const thoseInvited = querySnapshot.docs.map((doc) => ({
       uid: doc.id,
       ...doc.data(),
-    })) as IInvitedUser[];
+    })) as User[];
 
     return thoseInvited;
   } catch (error) {
@@ -588,7 +578,6 @@ export const getAllInvitedUsers: () => Promise<IInvitedUser[]> = async () => {
     throw error;
   }
 };
-
 
 export const createNewContact = async (
   contactData: Omit<IContact, "id" | "userId" | "createdAt" | "updatedAt">,
@@ -678,10 +667,13 @@ export const createNewShowing = async (
 ) => {
   try {
     const docRef = doc(collection(db, COLLECTIONS.SHOWINGS));
-    const propertyDocRef = doc(db, COLLECTIONS.PROPERTIES, propertyData.propertyID);
-    
-    console.log("SHOWING IS STILL WORKING AT THIS POINT 1");
+    const propertyDocRef = doc(
+      db,
+      COLLECTIONS.PROPERTIES,
+      propertyData.propertyID,
+    );
 
+    console.log("SHOWING IS STILL WORKING AT THIS POINT 1");
 
     await setDoc(docRef, {
       ...propertyData,
@@ -691,15 +683,11 @@ export const createNewShowing = async (
       updatedAt: new Date().toISOString(),
     });
 
+    //update the property with a showind id
 
-//update the property with a showind id
-
-await updateDoc(propertyDocRef, {
-  showings: arrayUnion(docRef.id),
-});
-
-
-
+    await updateDoc(propertyDocRef, {
+      showings: arrayUnion(docRef.id),
+    });
 
     console.log("SHOWING IS STILL WORKING AT THIS POINT 2");
 
@@ -710,22 +698,16 @@ await updateDoc(propertyDocRef, {
   }
 };
 
-export const getAllShowings: (
-) => Promise<IShowing[]> = async () => {
+export const getAllShowings: () => Promise<IShowing[]> = async () => {
   try {
     // const q = query(collection(db, COLLECTIONS.SHOWINGS));
-    const q = query(
-      collection(db, COLLECTIONS.SHOWINGS),
-      orderBy("createdAt"),
-    );
+    const q = query(collection(db, COLLECTIONS.SHOWINGS), orderBy("createdAt"));
 
     const querySnapshot = await getDocs(q);
     const showings = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-    }))as IShowing[];
-
-     
+    })) as IShowing[];
 
     return showings;
   } catch (error) {
@@ -749,7 +731,7 @@ export const getAllShowings: (
 //      ...doc.data(),
 //    }))as unknown as IProperty[];
 //
-//     
+//
 //
 //    return properties;
 //  } catch (error) {
@@ -757,8 +739,6 @@ export const getAllShowings: (
 //    throw error;
 //  }
 //};
-
-
 
 export const getAllProperties = async (): Promise<Property[]> => {
   const snapshot = await getDocs(propertiesCollection);
@@ -786,9 +766,6 @@ export const getAllProperties = async (): Promise<Property[]> => {
   });
 };
 
-
-
-
 export const getShowingByID = async (showingID: string) => {
   const ref = doc(db, COLLECTIONS.SHOWINGS, showingID);
   const snapshot = await getDoc(ref);
@@ -806,7 +783,6 @@ export const getRequestByID = async (requestID: string) => {
 
   return snapshot.data();
 };
-
 
 export const getPropertyByID = async (propertyID: string) => {
   const ref = doc(db, COLLECTIONS.PROPERTIES, propertyID);
@@ -830,29 +806,20 @@ export const updateShowingInvitees = async (
     });
 
     //const invitedUsersRef = doc(db, COLLECTIONS.INVITEDUSERS);
-      const invitedUsersRef = doc(collection(db, COLLECTIONS.INVITEDUSERS));
+    const invitedUsersRef = doc(collection(db, COLLECTIONS.INVITEDUSERS));
 
     //ADD TO INVITED USERS COLLECTION - START
-   
 
     await setDoc(invitedUsersRef, {
-      uid:invitedUsersRef.id,
-      invitedUsersId:invitedUsersRef.id,
-      email:newEmail,
-      showingID:showingID,
+      uid: invitedUsersRef.id,
+      invitedUsersId: invitedUsersRef.id,
+      email: newEmail,
+      showingID: showingID,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
-     
 
-
-    //ADD TO INVITED USERS COLLECTION  -END 
-
-
-    
-
-
-    
+    //ADD TO INVITED USERS COLLECTION  -END
 
     return true;
   } catch (error) {
