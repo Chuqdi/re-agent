@@ -686,6 +686,7 @@ export const createNewShowing = async (
     await setDoc(docRef, {
       ...propertyData,
       showingID: docRef.id,
+      propertyID:propertyDocRef.id,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });

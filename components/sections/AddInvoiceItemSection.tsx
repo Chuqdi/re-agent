@@ -68,7 +68,7 @@ function AddInvoiceItemSection({
     }
     setActiveInvoiceItem(undefined);
     action.resetForm();
-    setIsShowingAddItemsInputs(false);
+    //setIsShowingAddItemsInputs(false);
    
   };
 
@@ -108,6 +108,7 @@ function AddInvoiceItemSection({
       className=" space-y-7"
       onSubmit={(e) => {
         e.preventDefault();
+        setIsShowingAddItemsInputs(true);
         isShowingAddItemsInputs
           ? handleSubmit()
           : setIsShowingAddItemsInputs(true);
