@@ -320,7 +320,6 @@ export default function LocationPage() {
       const result = await res.json();
 
       if (result.success) {
-        console.log("Email sent!");
         setInviteEmail("");
 
         if (selectedRequest?.coordinates) {
@@ -466,10 +465,9 @@ export default function LocationPage() {
                   <select
                     value={selectedRequestID}
                     onChange={(e) => {
-                      console.log("WHAT IS E.TARGET.VALUE--->", e.target.value);
                       setSelectedRequestID(
                         e.target.value && e.target.value,
-                      ); /*setSelectedRequest(e.target.value)*/
+                      ); 
                     }}
                     className="bg-white text-xs text-black focus:outline-none"
                   >

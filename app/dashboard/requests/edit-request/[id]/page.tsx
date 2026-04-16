@@ -1,13 +1,16 @@
 "use client";
 import AppShell from "@/components/layout/AppShell";
-import { createNewRequest,updateCurrentRequest, getRequestByID } from "@/lib/firebase/firestore";
+import {
+  createNewRequest,
+  updateCurrentRequest,
+  getRequestByID,
+} from "@/lib/firebase/firestore";
 import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
 import * as yup from "yup";
 import { getAddressGeoCoordinates } from "@/lib/utils/geolocation";
-
 
 const scheme = yup.object({
   property: yup.string().required("Required"),
@@ -21,13 +24,13 @@ const scheme = yup.object({
   status: yup.string().required("Required"),
 });
 
-
 type PageProps = {
-  params: {
+  params: Promise<{
     id: string;
-  };
-};
+  }>;
 
+  
+};
 
 function EditRequest({ params }: PageProps) {
   const [isLoading, setIsLoading] = useState(false);
@@ -35,55 +38,46 @@ function EditRequest({ params }: PageProps) {
   const auth = getAuth();
   const currentUser = auth.currentUser;
 
+  const { id } = use(params);
+  const [request, setRequest] = useState<any | null>(null);
 
-const { id } = params;
-const [request, setRequest] = useState<any | null>(null);
+  //useEffect(() => {
+  //
+  //
+  //  const fetchRequest = async () => {
+  //    const doc = await db.collection("requests").doc(id).get();
+  //    if (doc.exists) {
+  //      console.log(doc.data());
+  //    }
+  //  };
+  //
+  //  fetchRequest();
+  //}, [id]);
 
-//useEffect(() => {
-//
-//
-//  const fetchRequest = async () => {
-//    const doc = await db.collection("requests").doc(id).get();
-//    if (doc.exists) {
-//      console.log(doc.data());
-//    }
-//  };
-//
-//  fetchRequest();
-//}, [id]);
+  useEffect(() => {
+    // const parsed = JSON.parse(data) as any; //used to be as IRequest
 
+    //setSelectedRequests(parsed);
 
+    // fetch latest version from firestore
+    getRequestByID(id).then((returnedRequest) => {
+      if (returnedRequest) {
+        setRequest(returnedRequest);
 
+        setRequest({
+          ...returnedRequest,
+          property: returnedRequest.property || "",
+          city: returnedRequest.city || "",
+          state: returnedRequest.state || "",
+          type: returnedRequest.type || "Buy",
+          amount: returnedRequest.amount || 0,
+          status: returnedRequest.status || "Active",
+        });
+      }
+    });
+  }, []);
 
-useEffect(() => {
- 
- // const parsed = JSON.parse(data) as any; //used to be as IRequest
-
-  //setSelectedRequests(parsed);
-
-  // fetch latest version from firestore
-  getRequestByID(id).then((returnedRequest) => {
-    if (returnedRequest) {
-      setRequest(returnedRequest);
-
-
-      setRequest({
-        ...returnedRequest,
-        property: returnedRequest.property || "",
-        city: returnedRequest.city || "",
-        state: returnedRequest.state || "",
-        type: returnedRequest.type || "Buy",
-        amount: returnedRequest.amount || 0,
-        status: returnedRequest.status || "Active",
-      });
-    }
-  });
-}, []);
-
-
-console.log("WHAT IS THE FETCHED REQUEST--->",request)
-
-
+  console.log("WHAT IS THE FETCHED REQUEST--->", request);
 
   const onSubmit = async (data: {
     property: string;
@@ -92,7 +86,6 @@ console.log("WHAT IS THE FETCHED REQUEST--->",request)
     type: string;
     amount: number;
     status: string;
-   
   }) => {
     setIsLoading(true);
     const { state, city } = data;
@@ -107,7 +100,12 @@ console.log("WHAT IS THE FETCHED REQUEST--->",request)
 
     try {
       const userId = currentUser?.uid;
-      if (userId) await updateCurrentRequest(request.requestID,{ ...data, coordinates }, userId!);
+      if (userId)
+        await updateCurrentRequest(
+          request.requestID,
+          { ...data, coordinates },
+          userId!,
+        );
       router.push("/dashboard/requests");
     } catch (error) {
       alert("Error updating requests");
@@ -117,8 +115,8 @@ console.log("WHAT IS THE FETCHED REQUEST--->",request)
   const { values, handleSubmit, handleChange, errors, touched } = useFormik({
     validationSchema: scheme,
     onSubmit,
-    enableReinitialize:true,
-    initialValues:request|| {
+    enableReinitialize: true,
+    initialValues: request || {
       property: "",
       city: "",
       state: "",
