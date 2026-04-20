@@ -109,7 +109,7 @@ function AddNewShowing() {
     setFieldValue("state", selected.state);
     setFieldValue("invitee", selected.invitee);
     setFieldValue("propertyID", selected.propertyID);
-     setFieldValue("name",e.target.value/*, selected.name*/);
+     setFieldValue("name",e.target.value.name/*, selected.name*/);
   };
 
   useEffect(() => {
@@ -135,6 +135,7 @@ function AddNewShowing() {
               </p>
             </div>
             <div className="space-y-4">
+              {/*
               <div className="flex items-start gap-4">
                 <div className="flex-1">
                   <Input
@@ -170,27 +171,31 @@ function AddNewShowing() {
                   />
                 </div>
               </div>
-
-              <div className="mb-3 flex items-center justify-between gap-3 text-xs text-gray-600">
+               */}
+              <div className="mb-3 flex items-center justify-between gap-3  text-[13px]   text-gray-600">
                
-                    <div className="flex-1">
+                    
                   <SelectOption
+                   className="text-[16px] bg-white"
                     value={values.name} //note, name is just being used to hold the property name
                     onChange={handlePropertyChange}
                     errorMessage={errors.name}
                     required
                     label="Property"
                   >
-                    <option value="">Select Property</option>
+                    
+                    <option className="text-[16px] bg-white"  value="">Select Property</option>
                     {allProperties.length > 0  && allProperties.map((property) => (
-                      <option key={property?.propertyID}
+                      <option className="text-[16px] bg-white" key={property?.propertyID}
                       value={JSON.stringify(property)}
                       >
                         {property?.name} 
                       </option>
+                     
                     ))}
+                   
                   </SelectOption>
-                </div>
+                
                 
            </div>
 

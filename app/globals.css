@@ -13,6 +13,8 @@ body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", Arial, sans-serif;
 }
 
+
+
 * {
   box-sizing: border-box;
 }
@@ -33,6 +35,12 @@ body {
   }
 }
 
+
+
+select {
+  background-color:white;
+  
+}
 
 
 .fc .fc-day-today {

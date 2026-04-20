@@ -154,7 +154,7 @@ function ShowingsCalendarViewSection({ showings }: Props) {
             {title}
           </span>
         </div>
-
+""
         <div className="flex gap-1 rounded-lg  p-1">
           {VIEW_OPTIONS.map(({ label, value }) => (
             <button
@@ -175,7 +175,7 @@ function ShowingsCalendarViewSection({ showings }: Props) {
         </div>
       </div>
 
-      <div className="overflow-auto">
+      <div className="overflow-auto text-[13px]">
         <FullCalendar
           ref={calendarRef}
           plugins={[dayGridPlugin, timeGridPlugin]}
