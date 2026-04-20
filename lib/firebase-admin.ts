@@ -1,6 +1,3 @@
-// Firebase Admin SDK initialization for server-side use
-// This should only be used in API routes and Cloud Functions
-
 import { initializeApp, getApps, cert, App } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -8,12 +5,9 @@ import { getFirestore } from 'firebase-admin/firestore';
 let adminApp: App;
 
 if (getApps().length === 0) {
-  // Check if we're in a Cloud Functions environment
   if (process.env.FIREBASE_CONFIG) {
-    // Cloud Functions automatically initializes Firebase Admin
     adminApp = initializeApp();
   } else {
-    // For Next.js API routes, use service account
     if (
       process.env.FIREBASE_PROJECT_ID &&
       process.env.FIREBASE_CLIENT_EMAIL &&
@@ -27,7 +21,9 @@ if (getApps().length === 0) {
         }),
       });
     } else {
-      throw new Error('Firebase Admin credentials not configured');
+      // Don't throw during build — credentials only needed at runtime
+      console.warn('Firebase Admin credentials not configured');
+      adminApp = initializeApp(); // initialize without credentials so exports don't break
     }
   }
 } else {
@@ -37,4 +33,3 @@ if (getApps().length === 0) {
 export const adminAuth = getAuth(adminApp);
 export const adminDb = getFirestore(adminApp);
 export default adminApp;
-

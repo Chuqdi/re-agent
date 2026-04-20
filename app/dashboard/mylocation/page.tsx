@@ -13,10 +13,9 @@ import {
   Marker,
   useLoadScript,
 } from "@react-google-maps/api";
-import { getShowing } from "@/lib/firebase/firestore";
-import { getAllUsers,getAllInvitedUsers,getAllRequests,getShowingByID } from "@/lib/firebase/firestore";
-import { IInvitedUser, IRequest,IUser, Showing } from "@/types";
-import { useGeoLocation } from "@/lib/contexts/GeoLocationContext";
+import { getAllInvitedUsers,getShowingByID } from "@/lib/firebase/firestore";
+import { IInvitedUser,  } from "@/types";
+import { useGeoLocationContext } from "@/lib/contexts/GeoLocationContext";
 import { mapContainerStyle, mapLineStyleOptions } from "@/lib/utils";
 import { Link, Plus, Search } from "lucide-react";
 
@@ -59,7 +58,7 @@ function MyLocationContent() {
   const parsedGeneral = JSON.parse(dataGeneral) as any; //used to be as IRequest
 
 
-  const { location, error: locationError } = useGeoLocation();
+  const { location, error: locationError } = useGeoLocationContext();
 
   const [users, setUsers] = useState<IInvitedUser[]>();
 

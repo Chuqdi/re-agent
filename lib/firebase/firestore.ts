@@ -559,7 +559,7 @@ export const getAllUsers: () => Promise<IUser[]> = async () => {
   }
 };
 
-export const getAllInvitedUsers: () => Promise<User[]> = async () => {
+export const getAllInvitedUsers: () => Promise<IInvitedUser[]> = async () => {
   try {
     const q = query(
       collection(db, COLLECTIONS.INVITEDUSERS),
@@ -570,7 +570,7 @@ export const getAllInvitedUsers: () => Promise<User[]> = async () => {
     const thoseInvited = querySnapshot.docs.map((doc) => ({
       uid: doc.id,
       ...doc.data(),
-    })) as User[];
+    })) as IInvitedUser[];
 
     return thoseInvited;
   } catch (error) {

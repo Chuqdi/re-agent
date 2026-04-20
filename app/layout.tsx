@@ -3,11 +3,17 @@ import "./globals.css";
 import Head from "next/head";
 import Script from "next/script";
 
+
+export const viewport = {
+  themeColor: "#000000",
+};
+
+
+
 export const metadata: Metadata = {
   title: "Real Estate Agents SaaS",
   description: "Real Estate SaaS MVP for Gmail users",
   manifest: '/manifest.json',
-  themeColor: '#000000',
 };
 
 export default function RootLayout({
