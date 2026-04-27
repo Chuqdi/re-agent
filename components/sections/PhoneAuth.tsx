@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   RecaptchaVerifier,
   signInWithPhoneNumber,
@@ -14,23 +14,6 @@ declare global {
   }
 }
 
-function getOrCreateVerifier(): RecaptchaVerifier {
-  // Reuse existing verifier if available
-  if (window.recaptchaVerifier) return window.recaptchaVerifier;
-
-  const verifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-    size: "invisible",
-    callback: () => {},  
-    "expired-callback": () => {
-      window.recaptchaVerifier?.clear();
-      window.recaptchaVerifier = null;
-    },
-  });
-
-  window.recaptchaVerifier = verifier;
-  return verifier;
-}
-
 export default function PhoneAuth() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -39,23 +22,57 @@ export default function PhoneAuth() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  useEffect(() => {
+    // Initialize and render reCAPTCHA on mount
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(
+        auth,
+        "recaptcha-container",
+        {
+          size: "invisible",
+          callback: () => {},
+          "expired-callback": () => {
+            window.recaptchaVerifier?.clear();
+            window.recaptchaVerifier = null;
+          },
+        },
+      );
+
+      window.recaptchaVerifier.render().catch((err) => {
+        console.error("reCAPTCHA render error:", err);
+        window.recaptchaVerifier?.clear();
+        window.recaptchaVerifier = null;
+      });
+    }
+
+    return () => {
+      window.recaptchaVerifier?.clear();
+      window.recaptchaVerifier = null;
+    };
+  }, []);
+
   const sendOTP = async () => {
     if (!phone) return alert("Enter phone number with country code");
 
     try {
       setLoading(true);
-      const appVerifier = getOrCreateVerifier();
+
+      if (!window.recaptchaVerifier) {
+        throw new Error("reCAPTCHA not initialized");
+      }
+
+      // Wait for render to complete before proceeding
+      await window.recaptchaVerifier.render();
+
       const confirmation = await signInWithPhoneNumber(
         auth,
         phone,
-        appVerifier,
+        window.recaptchaVerifier,
       );
       setConfirmationResult(confirmation);
       alert("OTP sent!");
     } catch (error: any) {
       console.error("Send OTP Error:", error);
-
-      // Always reset verifier on failure so next attempt gets a fresh one
       window.recaptchaVerifier?.clear();
       window.recaptchaVerifier = null;
 
@@ -63,6 +80,8 @@ export default function PhoneAuth() {
         alert("Invalid phone number. Use E.164 format: +2348012345678");
       } else if (error.code === "auth/too-many-requests") {
         alert("Too many attempts. Try again later.");
+      } else if (error.code === "auth/invalid-app-credential") {
+        alert("reCAPTCHA failed. Please refresh and try again.");
       } else {
         alert(`Failed to send OTP: ${error.message}`);
       }
@@ -73,6 +92,7 @@ export default function PhoneAuth() {
 
   const verifyOTP = async () => {
     if (!confirmationResult) return;
+
     try {
       setLoading(true);
       const result = await confirmationResult.confirm(otp);
@@ -128,7 +148,7 @@ export default function PhoneAuth() {
           </button>
         </>
       )}
-      {/* Must be in the DOM before sendOTP is called */}
+      {/* Must stay in the DOM at all times */}
       <div id="recaptcha-container" />
     </div>
   );
