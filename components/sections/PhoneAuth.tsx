@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import {
   RecaptchaVerifier,
@@ -20,92 +21,96 @@ export default function PhoneAuth() {
   const [confirmationResult, setConfirmationResult] =
     useState<ConfirmationResult | null>(null);
   const [loading, setLoading] = useState(false);
+
   const router = useRouter();
 
+  // ✅ Initialize reCAPTCHA ONLY ONCE
   useEffect(() => {
-    // Initialize and render reCAPTCHA on mount
+    if (typeof window === "undefined") return;
+
     if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(
-        auth,
-        "recaptcha-container",
-        {
-          size: "invisible",
-          callback: () => {},
-          "expired-callback": () => {
-            window.recaptchaVerifier?.clear();
-            window.recaptchaVerifier = null;
-          },
-        },
-      );
+      try {
+        window.recaptchaVerifier = new RecaptchaVerifier(
+          auth,
+          "recaptcha-container",
+          {
+            size: "invisible",
+          }
+        );
 
-      window.recaptchaVerifier.render().catch((err) => {
-        console.error("reCAPTCHA render error:", err);
-        window.recaptchaVerifier?.clear();
-        window.recaptchaVerifier = null;
-      });
+        window.recaptchaVerifier.render();
+      } catch (err) {
+        console.error("reCAPTCHA init error:", err);
+      }
     }
-
-    return () => {
-      window.recaptchaVerifier?.clear();
-      window.recaptchaVerifier = null;
-    };
   }, []);
 
+  // ✅ SEND OTP
   const sendOTP = async () => {
-    if (!phone) return alert("Enter phone number with country code");
+    if (!phone) {
+      alert("Enter phone number in format: +2348012345678");
+      return;
+    }
 
     try {
       setLoading(true);
 
       if (!window.recaptchaVerifier) {
-        throw new Error("reCAPTCHA not initialized");
+        throw new Error("reCAPTCHA not ready. Refresh page.");
       }
-
-      // Wait for render to complete before proceeding
-      await window.recaptchaVerifier.render();
 
       const confirmation = await signInWithPhoneNumber(
         auth,
         phone,
-        window.recaptchaVerifier,
+        window.recaptchaVerifier
       );
+
       setConfirmationResult(confirmation);
       alert("OTP sent!");
     } catch (error: any) {
       console.error("Send OTP Error:", error);
-      window.recaptchaVerifier?.clear();
-      window.recaptchaVerifier = null;
+
+      // 🔁 Only reset reCAPTCHA if it's actually invalid
+      if (error.code === "auth/invalid-app-credential") {
+
+        window.recaptchaVerifier?.clear();
+        window.recaptchaVerifier = null;
+        
+      }
 
       if (error.code === "auth/invalid-phone-number") {
         alert("Invalid phone number. Use E.164 format: +2348012345678");
       } else if (error.code === "auth/too-many-requests") {
         alert("Too many attempts. Try again later.");
-      } else if (error.code === "auth/invalid-app-credential") {
-        alert("reCAPTCHA failed. Please refresh and try again.");
       } else {
-        alert(`Failed to send OTP: ${error.message}`);
+        alert(error.message || "Failed to send OTP");
       }
     } finally {
       setLoading(false);
     }
   };
 
+  // ✅ VERIFY OTP
   const verifyOTP = async () => {
     if (!confirmationResult) return;
 
     try {
       setLoading(true);
+
       const result = await confirmationResult.confirm(otp);
+
       console.log("User:", result.user);
+
       router.push("/");
       router.refresh();
     } catch (error: any) {
       console.error("OTP Verification Error:", error);
-      alert(
-        error.code === "auth/invalid-verification-code"
-          ? "Wrong OTP, try again."
-          : "Verification failed.",
-      );
+
+      if (error.code === "auth/invalid-verification-code") {
+        alert("Wrong OTP, try again.");
+      } else {
+        alert("Verification failed.");
+      }
     } finally {
       setLoading(false);
     }
@@ -122,6 +127,7 @@ export default function PhoneAuth() {
             onChange={(e) => setPhone(e.target.value)}
             className="border p-2 rounded"
           />
+
           <button
             onClick={sendOTP}
             disabled={loading}
@@ -139,6 +145,7 @@ export default function PhoneAuth() {
             onChange={(e) => setOtp(e.target.value)}
             className="border p-2 rounded"
           />
+
           <button
             onClick={verifyOTP}
             disabled={loading}
@@ -148,7 +155,8 @@ export default function PhoneAuth() {
           </button>
         </>
       )}
-      {/* Must stay in the DOM at all times */}
+
+      {/* ✅ MUST stay mounted */}
       <div id="recaptcha-container" />
     </div>
   );

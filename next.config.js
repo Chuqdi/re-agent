@@ -8,12 +8,17 @@ const nextConfig = {
   },
 };
 
-// module.exports = nextConfig
-
+// module.exports = nextConfig;
 
 module.exports = withPWA({
   dest: "public",
   register: true,
   skipWaiting: true,
   disable: false,
+  runtimeCaching: [
+    {
+      urlPattern: /^https:\/\/www\.google\.com\/recaptcha/,
+      handler: "NetworkOnly",
+    },
+  ],
 })(nextConfig);

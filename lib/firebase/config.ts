@@ -25,21 +25,22 @@ if (getApps().length === 0) {
   app = getApps()[0];
 }
 
-// Initialize App Check with reCAPTCHA Enterprise
-// Must be client-side only
-if (typeof window !== 'undefined') {
-  // Enable debug token in development so local testing works without real assessments
+// Initialize App Check (client-side only, once)
+let appCheckInitialized = false;
+
+if (typeof window !== 'undefined' && !appCheckInitialized) {
   if (process.env.NODE_ENV === 'development') {
     (self as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
   }
 
   initializeAppCheck(app, {
-    provider: new ReCaptchaEnterpriseProvider('6LfhzW4sAAAAGKG89mGYv3xOLwF2VpElW9uFgks'),
+    provider: new ReCaptchaEnterpriseProvider('6LfhzW4sAAAAAGKG89mGYv3xOLwF2VpElW9uFgks'),
     isTokenAutoRefreshEnabled: true,
   });
+
+  appCheckInitialized = true;
 }
 
-// Initialize services
 export const auth: Auth = getAuth(app);
 export const db: Firestore = getFirestore(app);
 export const realtimeDb: Database = getDatabase(app);
