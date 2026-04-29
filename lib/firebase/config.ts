@@ -25,19 +25,16 @@ if (getApps().length === 0) {
   app = getApps()[0];
 }
 
-// Initialize App Check (client-side only, once)
+// App Check for Firestore/Realtime DB only — NOT enforced on Auth
 let appCheckInitialized = false;
-
 if (typeof window !== 'undefined' && !appCheckInitialized) {
   if (process.env.NODE_ENV === 'development') {
     (self as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
   }
-
   initializeAppCheck(app, {
     provider: new ReCaptchaEnterpriseProvider('6LfhzW4sAAAAAGKG89mGYv3xOLwF2VpElW9uFgks'),
     isTokenAutoRefreshEnabled: true,
   });
-
   appCheckInitialized = true;
 }
 

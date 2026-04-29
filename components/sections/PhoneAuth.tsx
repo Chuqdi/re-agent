@@ -1,38 +1,72 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect, useRef } from "react";
 import {
+  RecaptchaVerifier,
   signInWithPhoneNumber,
   ConfirmationResult,
-  ApplicationVerifier,
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase/config";
-
-// Dummy verifier — App Check handles the actual verification
-const dummyVerifier: ApplicationVerifier = {
-  type: "recaptcha",
-  verify: () => Promise.resolve("app-check-token"),
-};
 
 export default function PhoneAuth() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    // Initialize reCAPTCHA once on mount
+    if (!recaptchaVerifierRef.current) {
+      try {
+        recaptchaVerifierRef.current = new RecaptchaVerifier(
+          auth,
+          "recaptcha-container",
+          { size: "invisible" }
+        );
+        recaptchaVerifierRef.current.render();
+      } catch (err) {
+        console.error("reCAPTCHA init error:", err);
+      }
+    }
+
+    // Cleanup on unmount
+    return () => {
+      recaptchaVerifierRef.current?.clear();
+      recaptchaVerifierRef.current = null;
+    };
+  }, []);
 
   const sendOTP = async () => {
     if (!phone) {
       alert("Enter phone number in format: +2348012345678");
       return;
     }
+
     try {
       setLoading(true);
-      const confirmation = await signInWithPhoneNumber(auth, phone, dummyVerifier);
+
+      if (!recaptchaVerifierRef.current) {
+        throw new Error("reCAPTCHA not ready. Refresh page.");
+      }
+
+      const confirmation = await signInWithPhoneNumber(
+        auth,
+        phone,
+        recaptchaVerifierRef.current
+      );
+
       setConfirmationResult(confirmation);
       alert("OTP sent!");
     } catch (error: any) {
       console.error("Send OTP Error:", error);
+
+      // Reset verifier on error so it can be recreated fresh
+      recaptchaVerifierRef.current?.clear();
+      recaptchaVerifierRef.current = null;
+
       if (error.code === "auth/invalid-phone-number") {
         alert("Invalid phone number. Use E.164 format: +2348012345678");
       } else if (error.code === "auth/too-many-requests") {
@@ -47,6 +81,7 @@ export default function PhoneAuth() {
 
   const verifyOTP = async () => {
     if (!confirmationResult) return;
+
     try {
       setLoading(true);
       const result = await confirmationResult.confirm(otp);
@@ -102,6 +137,9 @@ export default function PhoneAuth() {
           </button>
         </>
       )}
+
+      {/* Must stay mounted for reCAPTCHA */}
+      <div id="recaptcha-container" />
     </div>
   );
 }
