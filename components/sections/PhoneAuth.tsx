@@ -8,11 +8,14 @@ import {
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase/config";
+import OtpInput from "../ui/OTPInput";
+import PhoneInput from "../ui/PhoneInput";
 
 export default function PhoneAuth() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [confirmationResult, setConfirmationResult] =
+    useState<ConfirmationResult | null>(null);
   const [loading, setLoading] = useState(false);
   const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
   const router = useRouter();
@@ -24,7 +27,7 @@ export default function PhoneAuth() {
         recaptchaVerifierRef.current = new RecaptchaVerifier(
           auth,
           "recaptcha-container",
-          { size: "invisible" }
+          { size: "invisible" },
         );
         recaptchaVerifierRef.current.render();
       } catch (err) {
@@ -55,7 +58,7 @@ export default function PhoneAuth() {
       const confirmation = await signInWithPhoneNumber(
         auth,
         phone,
-        recaptchaVerifierRef.current
+        recaptchaVerifierRef.current,
       );
 
       setConfirmationResult(confirmation);
@@ -85,11 +88,9 @@ export default function PhoneAuth() {
     try {
       setLoading(true);
       const result = await confirmationResult.confirm(otp);
-      console.log("User:", result.user);
       router.push("/");
       router.refresh();
     } catch (error: any) {
-      console.error("OTP Verification Error:", error);
       if (error.code === "auth/invalid-verification-code") {
         alert("Wrong OTP, try again.");
       } else {
@@ -104,13 +105,12 @@ export default function PhoneAuth() {
     <div className="flex flex-col gap-4 max-w-sm">
       {!confirmationResult ? (
         <>
-          <input
-            type="tel"
-            placeholder="+2348012345678"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="border p-2 rounded"
+          <PhoneInput
+            label="Phone number"
+            defaultCountryCode="NG"
+            onChange={setPhone}
           />
+
           <button
             onClick={sendOTP}
             disabled={loading}
@@ -121,13 +121,12 @@ export default function PhoneAuth() {
         </>
       ) : (
         <>
-          <input
-            type="text"
-            placeholder="Enter OTP"
+          <OtpInput
             value={otp}
-            onChange={(e) => setOtp(e.target.value)}
+            onChange={(value) => setOtp(value)}
             className="border p-2 rounded"
           />
+
           <button
             onClick={verifyOTP}
             disabled={loading}

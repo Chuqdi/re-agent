@@ -1,55 +1,53 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter,usePathname } from 'next/navigation';
-import { signInWithEmail, signInWithGoogle } from '@/lib/firebase/auth';
-import { setPersistence, browserSessionPersistence, signOut } from "firebase/auth";
+import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { signInWithEmail, signInWithGoogle } from "@/lib/firebase/auth";
+import {
+  setPersistence,
+  browserSessionPersistence,
+  signOut,
+} from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
-import PhoneAuth from './sections/PhoneAuth';
+import PhoneAuth from "./sections/PhoneAuth";
+import Link from "next/link";
+import { Phone } from "lucide-react";
+import { ORLine } from "./SignUpPage";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const pathname = usePathname();
 
-
-
-
-  
-     
-
-useEffect(()=>{
-  //signOut(auth)
-   setPersistence(auth, browserSessionPersistence);
-},[])
+  useEffect(() => {
+    //signOut(auth)
+    setPersistence(auth, browserSessionPersistence);
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
     setError(null);
     try {
-
       await setPersistence(auth, browserSessionPersistence);
       await signInWithEmail(email, password);
 
       const isMyLocationRoute = pathname.startsWith("/dashboard/mylocation");
 
-      if(isMyLocationRoute){
+      if (isMyLocationRoute) {
         router.push(pathname);
-      }else{
-        router.push('/');
+      } else {
+        router.push("/");
       }
-      
-
 
       router.refresh();
     } catch (err: any) {
-      console.error('Sign in error:', err);
-      setError(err?.message || 'Failed to sign in. Please try again.');
+      console.error("Sign in error:", err);
+      setError(err?.message || "Failed to sign in. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -60,11 +58,11 @@ useEffect(()=>{
     setError(null);
     try {
       await signInWithGoogle();
-      router.push('/');
+      router.push("/");
       router.refresh();
     } catch (err: any) {
-      console.error('Google sign in error:', err);
-      setError(err?.message || 'Google sign in failed.');
+      console.error("Google sign in error:", err);
+      setError(err?.message || "Google sign in failed.");
     } finally {
       setLoading(false);
     }
@@ -73,14 +71,24 @@ useEffect(()=>{
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
-        <h1 className="text-3xl font-bold text-center mb-2 text-gray-800">Welcome back</h1>
-        <p className="text-center text-gray-600 mb-6">Login with email to continue.</p>
+        <h1 className="text-3xl font-bold text-center mb-2 text-gray-800">
+          Welcome back
+        </h1>
+        <p className="text-center text-gray-600 mb-6">
+          Login with email to continue.
+        </p>
 
-        {error && <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+        {error && (
+          <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
             <input
               type="email"
               value={email}
@@ -92,7 +100,9 @@ useEffect(()=>{
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
             <input
               type="password"
               value={password}
@@ -108,7 +118,7 @@ useEffect(()=>{
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Signing in...' : 'Login'}
+            {loading ? "Signing in..." : "Login"}
           </button>
         </form>
 
@@ -124,7 +134,7 @@ useEffect(()=>{
           className="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {loading ? (
-            'Connecting...'
+            "Connecting..."
           ) : (
             <>
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -150,10 +160,20 @@ useEffect(()=>{
           )}
         </button>
 
+        <ORLine />
+
+        <Link
+          href="/signup/phone-number"
+          className="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          <Phone color="#000" />
+          Use Phone Number(Optional)
+        </Link>
+
         <p className="text-center text-sm text-gray-600 mt-6">
-          Don&apos;t have an account?{' '}
+          Don&apos;t have an account?{" "}
           <button
-            onClick={() => router.push('/signup')}
+            onClick={() => router.push("/signup")}
             className="text-blue-600 hover:text-blue-700 font-semibold"
           >
             Sign Up
@@ -163,4 +183,3 @@ useEffect(()=>{
     </div>
   );
 }
-
