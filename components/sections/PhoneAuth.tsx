@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, SetStateAction, Dispatch } from "react";
 import {
   RecaptchaVerifier,
   signInWithPhoneNumber,
@@ -11,11 +11,16 @@ import { auth } from "@/lib/firebase/config";
 import OtpInput from "../ui/OTPInput";
 import PhoneInput from "../ui/PhoneInput";
 
-export default function PhoneAuth() {
+export default function PhoneAuth({
+  confirmationResult,
+  setConfirmationResult,
+}: {
+  confirmationResult: ConfirmationResult | null;
+  setConfirmationResult: Dispatch<SetStateAction<ConfirmationResult | null>>;
+}) {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
-  const [confirmationResult, setConfirmationResult] =
-    useState<ConfirmationResult | null>(null);
+
   const [loading, setLoading] = useState(false);
   const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
   const router = useRouter();
